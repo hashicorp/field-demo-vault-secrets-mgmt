@@ -1,0 +1,61 @@
+#!/bin/bash -l
+
+# Get the PG DB cluster IP, set the PG Vars
+export PG_HOST=$(kubectl get svc -l app=postgres -o=json | jq -r '.items[0].spec.clusterIP')
+export PG_USER=postgres
+export PG_PASS=password
+
+
+# Check for DB secrets engine
+type_at_db_path=$(vault secrets list -format=json | jq -r '.["database/"]["type"]')
+if [ ! "$type_at_db_path" = "database" ]; then
+    fail-message "You haven't enabled the Database secrets engine yet."
+fi
+
+
+# Check configuration has the right TTL and database name.
+CONFIG_JSON=$(vault read database/roles/products-api -format=json)
+create_statement=$(echo $CONFIG_JSON | jq -r '.data.creation_statements[0]')
+db_name=$(echo $CONFIG_JSON | jq -r .data.db_name)
+default_ttl=$(echo $CONFIG_JSON | jq -r .data.default_ttl)
+max_ttl=$(echo $CONFIG_JSON | jq -r .data.max_ttl)
+
+if [ ! "$db_name" = "hashicups-pgsql" ]; then
+    fail-message "You haven't properly configured Vault to map a Vault role a Postgres creation statement. Check the database name."
+fi
+
+if [ ! "$default_ttl" = "1800" ]; then
+    fail-message "You haven't properly configured Vault to map a Vault role a Postgres creation statement. Check the default TTL."
+fi
+
+if [ ! "$max_ttl" = "3600" ]; then
+    fail-message "You haven't properly configured Vault to map a Vault role a Postgres creation statement. Check the max TTL."
+fi
+
+if [ ! "$create_statement" = "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" ]; then
+    fail-message "You haven't properly configured Vault to map a Vault role a Postgres creation statement. Check the creation statement."
+fi
+
+
+# Generate dynamic credentials and confirm they have access
+CREDS_RESP=$(vault read database/creds/products-api -format=json)
+DYN_PG_USER=$(echo $CREDS_RESP | jq -r .data.username)
+DYN_PG_PASS=$(echo $CREDS_RESP | jq -r .data.password)
+
+PGPASSWORD=$DYN_PG_PASS psql -h $PG_HOST -U $DYN_PG_USER -d postgres -c 'SELECT 1'
+if [ ! "$?" = "0" ]; then
+    fail-message "The credentials you generated did not work against Postgres. Did you configure everything correctly?"
+fi
+
+
+# Check that the root credentials were rotated
+PGPASSWORD=password psql -h $PG_HOST -U postgres -d postgres -c 'SELECT 1'
+if [ ! "$?" = "2" ]; then
+    fail-message "You did not rotate the root credential."
+fi
+
+
+old_username=$(vault read kv/db/postgres/product-db-creds -format=json | jq -r .data.username)
+if [ "$old_username" == "postgres" ]; then
+    fail-message "You did not remove the old credentials from the kv engine."
+fi

@@ -1,0 +1,6 @@
+version: "2"
+virtualmachines:
+- name: workstation
+  image: instruqt-hashicorp/kubernetes-base
+  shell: /bin/bash
+  machine_type: n1-standard-4

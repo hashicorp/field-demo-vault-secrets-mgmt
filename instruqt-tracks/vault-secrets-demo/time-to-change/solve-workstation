@@ -1,0 +1,9 @@
+#!/bin/bash -l
+
+# List the items mounted at kv/
+vault kv list kv
+
+# Read the current Products db secret
+vault read kv/db/postgres/product-db-creds
+
+exit 0

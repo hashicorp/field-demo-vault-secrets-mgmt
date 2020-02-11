@@ -1,0 +1,37 @@
+#!/bin/bash -l
+
+# Get the PG DB cluster IP, set the PG Vars
+export PG_HOST=$(kubectl get svc -l app=postgres -o=json | jq -r '.items[0].spec.clusterIP')
+# export PG_HOST="postgres.service.consul"
+export PG_USER=postgres
+export PG_PASS=password
+
+# Enable the Vault secrets engine
+vault secrets enable database
+
+# Configure Vault to communicate with the Postgres DB
+vault write database/config/hashicups-pgsql \
+    plugin_name=postgresql-database-plugin \
+    allowed_roles="products-api" \
+    connection_url="postgresql://{{username}}:{{password}}@$PG_HOST:5432/?sslmode=disable" \
+    username=$PG_USER \
+    password=$PG_PASS
+
+# Configure the Vault role to map to a Postgres role creation statement and privilege grant
+vault write database/roles/products-api \
+    db_name=hashicups-pgsql \
+    creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' SUPERUSER; \
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
+    default_ttl="30m" \
+    max_ttl="1h"
+
+# Generate a set of credentials for the Products Postgres DB
+vault read database/creds/products-api
+
+# Rotate the root credentials of the Postgres DB
+vault write -force database/rotate-root/hashicups-pgsql
+
+# Remove the old static credentials, they are no longer needed since they have been rotated.
+vault kv delete kv/db/postgres/product-db-creds
+
+# TODO: remove them from Postgres itself?

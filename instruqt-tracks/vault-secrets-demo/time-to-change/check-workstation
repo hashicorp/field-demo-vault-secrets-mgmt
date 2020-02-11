@@ -1,0 +1,5 @@
+#!/bin/bash -l
+
+grep -q "vault kv list" /root/.bash_history || fail-message "You haven't run 'vault kv list' yet."
+
+grep -q "vault read" /root/.bash_history || fail-message "You haven't run 'vault read' yet."
