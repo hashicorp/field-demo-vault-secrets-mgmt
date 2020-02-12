@@ -14,7 +14,8 @@ tags:
 owner: hashicorp
 developers:
 - neil@hashicorp.com
-private: true
+- lance@hashicorp.com
+private: false
 published: true
 challenges:
 - slug: time-to-change
@@ -641,4 +642,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 300
-checksum: "13453175749199972497"
+checksum: "5698568711819335745"
