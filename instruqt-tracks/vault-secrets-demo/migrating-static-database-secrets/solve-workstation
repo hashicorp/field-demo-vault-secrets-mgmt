@@ -9,6 +9,7 @@ vault kv put kv/db/postgres/product-db-creds \
 rm /share/postgres-product-creds.txt
 
 # Restart the Product API deployment
+echo "kubectl rollout restart deployment products-api-deployment" >> /root/.bash_history
 kubectl rollout restart deployment products-api-deployment
 
 # Give the pod time to cycle
