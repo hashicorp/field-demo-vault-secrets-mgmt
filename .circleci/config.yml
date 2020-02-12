@@ -34,7 +34,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Consul NMA Demo
+          name: Vault Secrets Mgmt Demo
           command: |
             VERSION=$INSTRUQT_VERSION
             apt -y update
