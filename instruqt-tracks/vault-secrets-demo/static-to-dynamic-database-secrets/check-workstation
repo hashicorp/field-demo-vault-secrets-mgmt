@@ -32,7 +32,7 @@ if [ ! "$max_ttl" = "3600" ]; then
     fail-message "You haven't properly configured Vault to map a Vault role a Postgres creation statement. Check the max TTL."
 fi
 
-if [ ! "$create_statement" = "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" ]; then
+if [ ! "$create_statement" = "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' SUPERUSER; GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" ]; then
     fail-message "You haven't properly configured Vault to map a Vault role a Postgres creation statement. Check the creation statement."
 fi
 

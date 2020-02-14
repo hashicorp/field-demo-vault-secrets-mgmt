@@ -222,7 +222,7 @@ challenges:
     kubectl get deploy
     ```
 
-    You should restart the `products-api-deployment, you can do that with a single
+    You should restart the `products-api-deployment`, you can do that with a single
     command.
 
     ```
@@ -316,6 +316,8 @@ challenges:
     vault policy write dba-operator policies/dba-operator-policy.hcl
     vault policy write products-api policies/products-api-policy.hcl
     ```
+
+    ---
 
     Now that the policies are in place for your users and applications, you
     should enable the [Userpass auth method](https://www.vaultproject.io/docs/auth/userpass.html)
@@ -607,6 +609,12 @@ challenges:
     sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/products-api.yml
     ```
 
+    Update the deployment in Kubernetes.
+
+    ```
+    kubectl apply -f products-api.yml
+    ```
+
     Again, restart the deployment.
 
     ```
@@ -692,4 +700,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 300
-checksum: "1357557224049504079"
+checksum: "14459169618522881512"
