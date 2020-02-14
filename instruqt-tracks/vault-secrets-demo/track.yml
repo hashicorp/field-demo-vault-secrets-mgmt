@@ -34,10 +34,8 @@ challenges:
 
     ---
 
-    You and your team have deployed all of the components of the the HashiCups Store into
-    Kubernetes, and one of your team members has already configured the
-    [Kubernetes Auth Method](https://www.vaultproject.io/docs/auth/kubernetes/)
-    for the cluster. However, when you open up the HashiCups Store tab,
+    Though your team has already deployed all of the components of the HashiCups
+    Store into Kubernetes already, when you open up the HashiCups Store tab,
     you see the app is showing "`Error :(`".
 
     The secrets used to connect each component must not have been migrated
@@ -97,9 +95,30 @@ challenges:
       secrets management solution.
   - type: text
     contents: |-
-      The HashiCups Store consists of several different components, all running within
-      Kubernetes. Many of these components require a secret to interact with another
-      component.
+      Vault is a tool for securely accessing secrets. A secret is anything that
+      you want to tightly control access to, such as API keys, passwords, or
+      certificates.
+
+      Vault provides a unified interface to any secret, while providing tight
+      access control and recording a detailed audit log.
+  - type: text
+    contents: |-
+      Vault has two important concepts to be aware of for this track:
+
+      - Auth Methods
+        - Are the components in Vault that perform authentication and
+        are responsible for assigning identity and a set of policies to a user.
+      - Secrets Engines
+        - Are components which store, generate, or encrypt data.
+        - Are incredibly flexible, so it is easiest to think about them in terms
+        of their function.
+        - Are provided some set of data, they take some action on that data,
+        and they return a result.
+  - type: text
+    contents: |-
+      The HashiCups Store itself consists of several different components, all
+      running within Kubernetes. Many of these components require a secret to
+      interact with another component.
   - type: text
     contents: |-
       The first components we'll take a look at are:
@@ -107,16 +126,28 @@ challenges:
         - [`frontend`](https://github.com/hashicorp-demoapp/frontend)
           - A front end web service for displaying HashiCups products.
         - [`product-api`](https://github.com/hashicorp-demoapp/product-api-go)
-          - A REST API service to serve CRUD operations on the `postgres` database.
-          - Requires credentials to connect to `postgres`
-          - TODO: should require an API token
+          - A REST API service abstracting the `products` database in `postgres`
+          - _Requires credentials to connect to `postgres`_
         - `postgres`
           - A Postgres database that contains the HashiCups products
 
       On the next slide, you can see how all the components interact. Don't worry
       about remembering it all now, we'll address them each in this track.
   - type: text
-    contents: '![HashiCups Reference Architecture Diagram](https://github.com/hashicorp-demoapp/infrastructure/raw/master/images/infa.png)'
+    contents: '![HashiCups Reference Architecture Diagram](https://github.com/hashicorp/field-demo-vault-secrets-mgmt/raw/master/images/infa.png)'
+  - type: text
+    contents: |-
+      Your team has already deployed all of the components of the HashiCups
+      Store into Kubernetes, and one of your team members has already configured
+      the [`kubernetes` Auth Method](https://www.vaultproject.io/docs/auth/kubernetes/)
+      in Vault.
+
+      The `kubernetes` auth method can be used to authenticate with Vault using a
+      Kubernetes Service Account Token. This method of authentication makes it easy
+      to introduce a Vault token into a Kubernetes Pod.
+
+      Because this has already been configured, you don't have to worry about how
+      the Kubernetes pods in the next steps are authenticating to Vault.
   tabs:
   - title: Terminal
     type: terminal
@@ -230,11 +261,6 @@ challenges:
       Your first task is to make sure those shared database credentials are correctly
       input into Vault.
   tabs:
-  - title: HashiCups Store
-    type: service
-    hostname: workstation
-    path: /
-    port: 30090
   - title: Terminal
     type: terminal
     hostname: workstation
@@ -252,6 +278,11 @@ challenges:
     type: service
     hostname: workstation
     port: 30443
+  - title: HashiCups Store
+    type: service
+    hostname: workstation
+    path: /
+    port: 30090
   difficulty: basic
   timelimit: 300
 - slug: restricting-access-to-secrets-using-acls
@@ -266,18 +297,23 @@ challenges:
     perform all operations on the `kv/database/` path. The web service should only be able
     to read secrets at that path.
 
-    You have been provided with pre-written ACL policies - take a look at them to see
-    what they will need to look like to make sure we have the right authorization.
+    You have been provided with pre-written ACL policies - one for the DBA operator
+    and one for the HashiCups Products API. Take a look at them to see what they
+    will need to look like to make sure we have the right authorization.
 
     ```
     cat policies/dba-operator-policy.hcl
+    cat policies/products-api-policy.hcl
     ```
 
-    Once you feel comfortable in your understanding of the policies, write them to Vault.
+    Once you feel comfortable you understand the policies, write them to Vault.
 
     ```
     vault policy write dba-operator policies/dba-operator-policy.hcl
+    vault policy write products-api policies/products-api-policy.hcl
     ```
+
+    # TODO: explain how the product api is working
 
     Now that the policies are in place for your users, you should enable the
     [Userpass auth method](https://www.vaultproject.io/docs/auth/userpass.html) and
@@ -406,9 +442,9 @@ challenges:
     PG_USER and POSTGRESS_PASS variables for easy of use and clarity..
 
     # TODO: do this with connect and get rid of the PG_HOST
+
     ```
     export PG_HOST=$(kubectl get svc -l app=postgres -o=json | jq -r '.items[0].spec.clusterIP')
-    # export PG_HOST=postgres.service.consul
     export PG_USER=postgres
     export PG_PASS=password
     ```
@@ -426,8 +462,6 @@ challenges:
     it with a `CREATE ROLE` statement in Postgres. Here you can also configure things like
     the `default_ttl` or `max_ttl`, which refers to the duration of the lease on the
     secrets before they expire and are automatically revoked.
-
-    *TODO: fix select permissions*
 
     ```
     vault write database/roles/products-api \
@@ -580,6 +614,8 @@ challenges:
     There is still one last thing that you need to do to get the app fixed and
     fully leveraging dynamic secrets.
 
+    ---
+
     Remembering what you learned about ACLs earlier in this track, modify
     `/root/policies/products-api-policy.hcl` and update the `products-api`
     policy in Vault to reflect the new path it should have access to read from.
@@ -596,6 +632,12 @@ challenges:
 
     ```
     sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/policies/products-api-policy.hcl
+    ```
+
+    You'll then need to upload your changes to Vault.
+
+    ```
+    vault policy write products-api policies/products-api-policy.hcl
     ```
 
     Restart the deployment one last time.
@@ -630,6 +672,11 @@ challenges:
     type: service
     hostname: workstation
     path: /ui/
+    port: 30082
+  - title: Consul UI
+    type: service
+    hostname: workstation
+    path: /ui/
     port: 30085
   - title: K8s UI
     type: service
@@ -642,4 +689,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 300
-checksum: "5698568711819335745"
+checksum: "1357557224049504079"
