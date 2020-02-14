@@ -7,7 +7,7 @@ sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /r
 # Update the Products API deployment
 kubectl apply -f /root/products-api.yml
 
-# TODO: update the products-api policy
+# Update the products-api policy
 vault policy write products-api policies/products-api-policy.hcl
 
 # Restart the deployment to take the new changes

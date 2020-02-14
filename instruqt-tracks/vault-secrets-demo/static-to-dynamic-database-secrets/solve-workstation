@@ -33,5 +33,3 @@ vault write -force database/rotate-root/hashicups-pgsql
 
 # Remove the old static credentials, they are no longer needed since they have been rotated.
 vault kv delete kv/db/postgres/product-db-creds
-
-# TODO: remove them from Postgres itself?
