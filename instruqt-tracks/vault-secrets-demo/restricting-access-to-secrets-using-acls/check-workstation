@@ -1,8 +1,8 @@
 #!/bin/bash -l
 
 # Check that both of the necesssary policies were written
-vault policy read dba-operator || fail-message "You did not upload a policy for `dba-operator`."
-vault policy read products-api || fail-message "You did not upload a policy for `products-api`."
+vault policy read dba-operator || fail-message "You did not upload a policy for dba-operator."
+vault policy read products-api || fail-message "You did not upload a policy for products-api."
 
 # Make sure the Userpass auth method was enabled
 type_at_userpass_path=$(vault auth list -format=json | jq -r '.["userpass/"]["type"]')

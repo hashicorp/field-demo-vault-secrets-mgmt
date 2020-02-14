@@ -516,16 +516,6 @@ challenges:
 
     You have successfully configured Vault for dynamic secrets, and eliminated another
     potential security issue by deleting the old credentials and rotating them in Vault.
-
-    Restart the Products API deployment again.
-
-    ```
-    kubectl rollout restart deployment products-api-deployment
-    ```
-
-    You should notice that the app is broken again. That's because the Products API deployment
-    is looking at the old path for it's secrets. Next, you'll learn how to update a
-    Kubernetes deployment to leverage the Vault Injector to deliver the secrets to the app.
   notes:
   - type: text
     contents: |-
@@ -621,10 +611,6 @@ challenges:
     kubectl rollout restart deployment products-api-deployment
     ```
 
-    When you open up the HashiCups UI, you'll notice that it's still broken.
-    There is still one last thing that you need to do to get the app fixed and
-    fully leveraging dynamic secrets.
-
     ---
 
     Remembering what you learned about ACLs earlier in this track, modify
@@ -700,4 +686,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 300
-checksum: "14459169618522881512"
+checksum: "6338365571862198787"
