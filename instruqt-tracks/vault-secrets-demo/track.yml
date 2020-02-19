@@ -161,15 +161,6 @@ challenges:
     hostname: workstation
     path: /ui/
     port: 30082
-  - title: Consul UI
-    type: service
-    hostname: workstation
-    path: /ui/
-    port: 30085
-  - title: K8s UI
-    type: service
-    hostname: workstation
-    port: 30443
   - title: HashiCups Store
     type: service
     hostname: workstation
@@ -210,11 +201,44 @@ challenges:
     ```
 
     Once you have updated the static credentials, you should redeploy the app so
-    that it pulls the latest credentials. Since we are running all of our components
-    in Kubernetes, we can do that with
+    that it pulls the latest credentials.
+
+    As noted earlier, you are running everything in Kubernetes, so you
+    will leverage the
+    [Vault Agent Sidecar Injector](https://www.vaultproject.io/docs/platform/k8s/injector/)
+    for Kubernetes. The Vault Agent leverages the
+    [Kubernetes auth method](https://www.vaultproject.io/docs/auth/kubernetes/)
+    to authenticate, and then injects secrets in a few ways.
+
+    You don't have to worry about how this is set up for now,
+    but you should understand what the containers it can inject do.
+
+    Two types Vault Agent containers can be injected: _init_ and _sidecar_.
+
+    The init container will prepopulate the shared memory volume with the
+    requested secrets prior to the other containers starting. The sidecar
+    container will continue to authenticate and render secrets to the same
+    location as the pod runs. Using annotations, the initialization and
+    sidecar containers may be disabled.
+
+    At a minimum, every container in the pod will be configured to mount a
+    shared memory volume. This volume is mounted to `/vault/secrets` and will
+    be used by the Vault Agent containers for sharing secrets with the other
+    containers in the pod.
+
+    You can see where your team specifies the path for the secret if you look
+    inside `products-api.yml`.
+
+    ```
+    cat products-api.yml
+    ```
+
+    Now that you understand how the Vault Agent Sidecar Injector for Kubernetes
+    works, it's time to cycle the deployment and read in the new secrets using
+    the init container.
+    Since we are running all of our components in Kubernetes, we can do that with
     [`kubectl`](https://kubernetes.io/docs/reference/kubectl/overview/).
 
-    *TODO: VAULT AGENT DESCRIPTION*
 
     You can see all of the deployments in your Kubernetes cluster.
 
@@ -273,20 +297,10 @@ challenges:
     hostname: workstation
     path: /ui/
     port: 30082
-  - title: Consul UI
-    type: service
-    hostname: workstation
-    path: /ui/
-    port: 30085
   - title: K8s UI
     type: service
     hostname: workstation
     port: 30443
-  - title: HashiCups Store
-    type: service
-    hostname: workstation
-    path: /
-    port: 30090
   difficulty: basic
   timelimit: 300
 - slug: restricting-access-to-secrets-using-acls
@@ -579,10 +593,10 @@ challenges:
     secrets.
   assignment: |-
     The Products API deployment that you have been manipulating over the course
-    of this track is located at `/root/product-api.yml`. Take a look inside.
+    of this track is located at `/root/products-api.yml`. Take a look inside.
 
     ```
-    less /root/product-api.yml
+    less /root/products-api.yml
     ```
 
     Look around for the string `agent-inject`. You'll notice a reference to a path
@@ -670,11 +684,6 @@ challenges:
     hostname: workstation
     path: /ui/
     port: 30082
-  - title: Consul UI
-    type: service
-    hostname: workstation
-    path: /ui/
-    port: 30085
   - title: K8s UI
     type: service
     hostname: workstation
@@ -686,4 +695,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 300
-checksum: "6338365571862198787"
+checksum: "785688496157901152"
