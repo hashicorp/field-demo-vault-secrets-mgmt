@@ -17,6 +17,7 @@ developers:
 - lance@hashicorp.com
 private: false
 published: true
+maintenance: true
 challenges:
 - slug: time-to-change
   id: xegkefzbeka5
@@ -25,12 +26,11 @@ challenges:
   teaser: Busted! Secrets at HashiCups, Inc. are not centralized or governed. It's
     time to change.
   assignment: |-
-    The [root token](https://www.vaultproject.io/docs/concepts/tokens/) for this Vault
-    installation is simply "root". Using the root token, you'll have full access to Vault
-    to begin this challenge.
-
-    You can log in using `vault login root` or by typing `root` into the token auth method
-    field in the UI.
+    The [root token](https://www.vaultproject.io/docs/concepts/tokens/) for
+    this Vault installation is simply "root". Using the root token, you'll have
+    full access to Vault to begin this challenge. You can log in using the
+    [`vault login`](https://www.vaultproject.io/docs/commands/login/) command,
+    or using the token in the UI.
 
     ---
 
@@ -39,8 +39,8 @@ challenges:
     you see the app is showing "`Error :(`".
 
     The secrets used to connect each component must not have been migrated
-    over to Vault correctly. You know your team member has already migrated the secret
-    into Vault, but you don't know at what path it is stored.
+    over to Vault correctly. You know your team member has already migrated the
+    secret into Vault, but you don't know at what path it is stored.
 
     Everything in Vault is path based, so the first thing you will need to do
     is find out at what path the `kv` secrets engine is mounted.
@@ -77,45 +77,41 @@ challenges:
 
     Something about the password doesn't look right...
 
-    Now that you have an idea of how path based secrets are laid out in Vault's `kv` secrets
-    engine, let's start fixing the HashiCups store.
+    Now that you have an idea of how path based secrets are laid out in Vault's
+    `kv` secrets engine, let's start fixing the HashiCups store.
   notes:
   - type: text
     contents: |-
       You are a DevOps engineer at HashiCups.
 
-      HashiCups has recently been audited by regulators and as a result of the
-      audit, it was exposed that the HashiCups Store app has poor secrets
-      management posture. For example. the auditors found secrets for the app
-      in plain text in git repos, shared mounts, and spreadsheets.
+      HashiCups has recently been audited by regulators who determined that the
+      HashiCups Store app has a poor secrets management posture. For example.
+      the auditors found secrets for the app in plain text in git repos, shared
+      mounts, and spreadsheets.
 
       To satisfy the regulators and auditors, HashiCups has decided to adopt
       Vault as a centralized secrets management service. Your team has been
-      tasked with migrating from your legacy secret storage to the new, Vault
+      tasked with migrating from your legacy secrets storage to the new, Vault
       secrets management solution.
   - type: text
     contents: |-
       Vault is a tool for securely accessing secrets. A secret is anything that
-      you want to tightly control access to, such as API keys, passwords, or
-      certificates.
+      you want to tightly control access to, such as an API key, password, or
+      certificate.
 
       Vault provides a unified interface to any secret, while providing tight
       access control and recording a detailed audit log.
   - type: text
     contents: |-
-      Vault has two important concepts to be aware of for this track:
+      Two important Vault components are used in this track:
 
-      - Auth Methods
-        - Are the components in Vault that perform authentication and
-        are responsible for assigning identity and a set of policies to a user.
-      - Secrets Engines
-        - Are components which store, generate, or encrypt data.
-        - Are incredibly flexible, so it is easiest to think about them in terms
-        of their function.
-        - Are provided some set of data, they take some action on that data,
-        and they return a result.
+      - **Auth Methods**
+        - Perform authentication and are responsible for assigning identity
+        (and policies) to a user.
+      - **Secrets Engines**
+        - Are components which store, generate, or encrypt secrets.
 
-      You can visually see how these interact on the next slide.
+      You can visually see how these interact on the next note.
   - type: text
     contents: '![Vault Triangle](https://github.com/hashicorp/field-demo-vault-secrets-mgmt/raw/master/images/vault-triangle.png)'
   - type: text
@@ -125,17 +121,17 @@ challenges:
       interact with another component.
   - type: text
     contents: |-
-      The first components we'll take a look at are:
+      The first components we'll look at are:
 
         - [`frontend`](https://github.com/hashicorp-demoapp/frontend)
           - A front end web service for displaying HashiCups products.
         - [`product-api`](https://github.com/hashicorp-demoapp/product-api-go)
           - A REST API service abstracting the `products` database in `postgres`
           - _Requires credentials to connect to `postgres`_
-        - `postgres`
-          - A Postgres database that contains the HashiCups products
+        - [`postgres`](https://github.com/hashicorp-demoapp/postgres)
+          - A PostgreSQL database that contains the HashiCups products
 
-      On the next slide, you can see how all the components interact. Don't worry
+      On the next note, you can see how all the components interact. Don't worry
       about remembering it all now, we'll address them each in this track.
   - type: text
     contents: '![HashiCups Reference Architecture Diagram](https://github.com/hashicorp/field-demo-vault-secrets-mgmt/raw/master/images/infa.png)'
@@ -143,7 +139,7 @@ challenges:
     contents: |-
       Your team has already deployed all of the components of the HashiCups
       Store into Kubernetes, and one of your team members has already configured
-      the [`kubernetes` Auth Method](https://www.vaultproject.io/docs/auth/kubernetes/)
+      the [`kubernetes` auth method](https://www.vaultproject.io/docs/auth/kubernetes/)
       in Vault.
 
       The `kubernetes` auth method can be used to authenticate with Vault using a
@@ -167,7 +163,7 @@ challenges:
     path: /
     port: 30090
   difficulty: basic
-  timelimit: 120
+  timelimit: 240
 - slug: migrating-static-database-secrets
   id: 3wunlrlkq2nz
   type: challenge
@@ -184,20 +180,12 @@ challenges:
     cat /share/postgres-product-creds.txt
     ```
 
-    Take the values from that file, and write them to correct path in Vault. It might
-    help to set them as env vars first.
-
-    ```
-    export PG_USER="postgres"
-    export PG_PASS="password"
-    ```
-
     Then write the values to Vault.
 
     ```
     vault kv put kv/db/postgres/product-db-creds \
-      username=$PG_USER \
-      password=$PG_PASS
+      username="postgres" \
+      password="password"
     ```
 
     Once you have updated the static credentials, you should redeploy the app so
@@ -213,7 +201,7 @@ challenges:
     You don't have to worry about how this is set up for now,
     but you should understand what the containers it can inject do.
 
-    Two types Vault Agent containers can be injected: _init_ and _sidecar_.
+    Two types of Vault Agent containers can be injected: _init_ and _sidecar_.
 
     The init container will prepopulate the shared memory volume with the
     requested secrets prior to the other containers starting. The sidecar
@@ -233,6 +221,9 @@ challenges:
     cat products-api.yml
     ```
 
+    Look for spec -> template -> metadata -> annotations -> vault.hashicorp.com.*
+    to understand what is being read from Vault, and written to the local filesystem.
+
     Now that you understand how the Vault Agent Sidecar Injector for Kubernetes
     works, it's time to cycle the deployment and read in the new secrets using
     the init container.
@@ -246,11 +237,19 @@ challenges:
     kubectl get deploy
     ```
 
+    You should notice that `products-api-deployment` shows `0/1`. **TODO**
+
     You should restart the `products-api-deployment`, you can do that with a single
     command.
 
     ```
     kubectl rollout restart deployment products-api-deployment
+    ```
+
+    Keep checking the deployment status until it's up and running.
+
+    ```
+    kubectl get deploy
     ```
 
     Once the deployment has been restarted, open up the HashiCups Store tab again
@@ -302,7 +301,7 @@ challenges:
     hostname: workstation
     port: 30443
   difficulty: basic
-  timelimit: 300
+  timelimit: 420
 - slug: restricting-access-to-secrets-using-acls
   id: zmkod8j9pbw1
   type: challenge
@@ -378,7 +377,7 @@ challenges:
       permissions before any user or machine can gain access.
   - type: text
     contents: |-
-      Vault uses policies to govern the the behavior of clients and instrument
+      Vault uses policies to govern the the behavior of clients and implements
       Role-Based Access Control (RBAC) by specifying access prvileges (_authorization_).
       Vault supports both [ACL policies](https://www.vaultproject.io/docs/concepts/policies.html)
       and [Sentinel policies](https://www.vaultproject.io/docs/enterprise/sentinel/index.html).
@@ -386,16 +385,17 @@ challenges:
       This challenge focuses on ACL policies.
   - type: text
     contents: |-
-      When you first initialize Vault, the root policy gets created by default. The
+      When you first initialize Vault, the root policy is created by default. The
       [root policy](https://www.vaultproject.io/docs/concepts/policies/#root-policy)
-      is a special policy that gives superuser access to everything in Vault. This
-      allows the superuser to set up the initial policies, auth methods, etc.
+      is a special policy that gives superuser access to everything in Vault.
+      This allows the superuser to set up the initial policies, auth methods,
+      etc.
 
       This is the policy you have been using up until now.
   - type: text
     contents: |-
-      Since Vault enforces the principle of "least-privileged" you should scope
-      the access to be as limited as possible.
+      Since Vault enforces the principle of "least-privileged access" you should
+      scope the access to be as limited as possible.
 
       As you have already seen - everything in Vault is path based.
 
@@ -406,7 +406,7 @@ challenges:
     contents: |-
       There are two roles at HashiCups that will need access to these secrets.
       The DBA team (`dba-operator`) will need to be able to perform all CRUD operations
-      on for the Postgres creds path, and the Products API (`products-api`) only needs
+      on the Postgres creds path, and the Products API (`products-api`) only needs
       to read the secrets at that path.
   tabs:
   - title: Terminal
@@ -432,7 +432,7 @@ challenges:
     path: /
     port: 30090
   difficulty: basic
-  timelimit: 300
+  timelimit: 420
 - slug: static-to-dynamic-database-secrets
   id: atiz2lovvrka
   type: challenge
@@ -533,9 +533,9 @@ challenges:
   notes:
   - type: text
     contents: |-
-      Now, you already moved the database credentials for the Products API,
-      but it would be even better if you didn't have to use the same credentials,
-      and could generate them on the fly.
+      Now, you already moved the database credentials for the Products API from
+      a file to Vault, but it would be even better if you didn't have to use
+      the same credentials, and could generate them on the fly.
   - type: text
     contents: |-
       Unlike the KV secrets engine where you had to put data into the store
@@ -545,21 +545,17 @@ challenges:
   - type: text
     contents: |-
       With every dynamic secret, Vault creates a _lease_: metadata containing
-      information such as TTL, renewability, and more. Once the lease is
-      expired, Vault can automatically revoke the data, and the consumer of
-      the secret can no longer be certain that it is valid.
-
-      Because Vault also has built-in revocation mechanisms, dynamic secrets
-      can be revoked immediately after use, minimizing the amount of time the
-      secret existed.
+      information such as TTL, renewability, and more. When a lease expires,
+      Vault automatically revokes the dynamic secret, and the consumer of the
+      secret can no longer be certain that it is valid. This minimizes the
+      amount of time the secret exists.
   - type: text
     contents: |-
-      The `database` secrets engine generates database credentials dynamically
-      based on configured roles. With each request, a unique username and
-      password pair are generated and returned. While it can manage static roles
-      and password rotation, that is not the focus of this challenge.
+      The `database` secrets engine can generate database credentials
+      dynamically based on configured roles. With each request, a unique
+      username and password pair are generated and returned.
 
-      The focus is on dynamic Postgres credential generation.
+      That will be the focus of this challenge.
   tabs:
   - title: Terminal
     type: terminal
@@ -584,7 +580,7 @@ challenges:
     path: /
     port: 30090
   difficulty: basic
-  timelimit: 300
+  timelimit: 600
 - slug: vault-agent-with-kubernetes
   id: mn20qfq1soij
   type: challenge
@@ -694,5 +690,5 @@ challenges:
     path: /
     port: 30090
   difficulty: basic
-  timelimit: 300
-checksum: "785688496157901152"
+  timelimit: 420
+checksum: "15499553333202591755"
