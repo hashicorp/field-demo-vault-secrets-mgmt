@@ -3,14 +3,9 @@
 ###########
 # Install Postgres client for testing
 ###########
+sudo apt-get update
 sudo apt-get install -y postgresql-client
 apt install postgresql-client-common
-
-
-###########
-# Get local IP
-###########
-local_ipv4=$(curl -s -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/ip)
 
 
 ###########
@@ -57,13 +52,11 @@ server:
     enabled: true
     config: |
       ui = true
-
       listener "tcp" {
         tls_disable = 1
         address = "[::]:8200"
         cluster_address = "[::]:8201"
       }
-
       storage "file" {
         path = "/vault/data"
       }
@@ -164,7 +157,6 @@ spec:
       targetPort: 5432
   selector:
     app: postgres
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -213,7 +205,6 @@ kubectl apply -f /root/products-db.yml
 cat <<-EOF > /root/products-api.yml
 ---
 # Service to expose web frontend
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -228,19 +219,15 @@ spec:
       protocol: TCP
       port: 9090
       targetPort: 9090
-
 ---
 # Service account to allow pod access to Vault via K8s auth
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: products-api
 automountServiceAccountToken: true
-
 ---
 # Web frontend
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -290,10 +277,8 @@ spec:
             timeoutSeconds: 1
             periodSeconds: 10
             failureThreshold: 30
-
 ---
 # https://www.vaultproject.io/docs/auth/kubernetes/#configuring-kubernetes
-
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
