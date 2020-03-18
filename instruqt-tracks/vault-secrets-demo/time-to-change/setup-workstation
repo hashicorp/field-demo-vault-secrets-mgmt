@@ -1,9 +1,117 @@
 #!/bin/sh
 
 ###########
+# Install Postgres client for testing
+###########
+sudo apt-get update
+sudo apt-get install -y postgresql-client
+apt install postgresql-client-common
+
+
+###########
+# Install Consul Client
+###########
+wget https://releases.hashicorp.com/consul/1.6.1/consul_1.6.1_linux_amd64.zip
+unzip consul_1.6.1_linux_amd64.zip
+mv consul /usr/local/bin/consul
+chmod +x /usr/local/bin/consul
+rm -f consul_1.6.1_linux_amd64.zip
+
+
+###########
+# Install Vault Client
+###########
+wget https://releases.hashicorp.com/vault/1.3.1/vault_1.3.1_linux_amd64.zip
+unzip vault_1.3.1_linux_amd64.zip
+mv vault /usr/local/bin/vault
+chmod +x /usr/local/bin/vault
+rm -f vault_1.3.1_linux_amd64.zip
+
+
+###########
 # Wait for k3s to startup
 ###########
 sleep 20
+
+
+###########
+# Grab the Vault Helm Chart
+###########
+git clone --branch v0.3.3 https://github.com/hashicorp/vault-helm.git
+
+
+###########
+# Configure Vault Helm Chart values
+###########
+
+cat <<-EOF > /root/vault-values.yaml
+server:
+  dev:
+    enabled: true
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+      storage "file" {
+        path = "/vault/data"
+      }
+  annotations:
+    consul.hashicorp.com/connect-inject: "true"
+ui:
+  enabled: true
+  serviceType: NodePort
+  externalPort: 8200
+  serviceNodePort: 30082
+EOF
+
+
+###########
+# Install Vault with Helm
+###########
+helm install --wait --name hashicups-vault -f /root/vault-values.yaml vault-helm/
+
+
+###########
+# Grab the Consul Helm Chart
+###########
+git clone --branch v0.16.0 https://github.com/hashicorp/consul-helm.git
+
+
+###########
+# Configure Consul Helm Chart values
+###########
+cat <<-EOF > /root/consul-values.yaml
+global:
+  datacenter: dc1
+  image: "consul:1.6.2"
+  imageK8S: "hashicorp/consul-k8s:0.11.0"
+server:
+  replicas: 1
+  bootstrapExpect: 1
+client:
+  enabled: true
+  grpc: true
+ui:
+  enabled: true
+connectInject:
+  enabled: true
+syncCatalog:
+  enabled: true
+  toConsul: true
+  toK8S: false
+  default: true
+EOF
+
+
+###########
+# Install Consul with Helm
+###########
+helm install --wait --name hashicups -f /root/consul-values.yaml consul-helm/
 
 
 ###########
@@ -49,7 +157,6 @@ spec:
       targetPort: 5432
   selector:
     app: postgres
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -98,7 +205,6 @@ kubectl apply -f /root/products-db.yml
 cat <<-EOF > /root/products-api.yml
 ---
 # Service to expose web frontend
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -113,19 +219,15 @@ spec:
       protocol: TCP
       port: 9090
       targetPort: 9090
-
 ---
 # Service account to allow pod access to Vault via K8s auth
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: products-api
 automountServiceAccountToken: true
-
 ---
 # Web frontend
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -175,10 +277,8 @@ spec:
             timeoutSeconds: 1
             periodSeconds: 10
             failureThreshold: 30
-
 ---
 # https://www.vaultproject.io/docs/auth/kubernetes/#configuring-kubernetes
-
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
@@ -370,9 +470,8 @@ echo "export VAULT_TOKEN=$VAULT_TOKEN" >> /root/.bashrc
 ###########
 # Wait for Vault to start
 ###########
-echo "Waiting for Vault to start..."
 sleep 10
-echo "Continuing."
+
 
 ###########
 # Set up the Kubernetes auth method with k3s
@@ -402,6 +501,9 @@ vault write auth/kubernetes/role/$SA_NAME \
 ###########
 # Seed Secrets
 ###########
+vault secrets enable kv
+
+# Create the KV secrets engine for static secrets
 vault secrets enable -path="kv" kv
 
 # Place an example secret in a "shared" mount to demo a bad secret management practice
@@ -449,7 +551,6 @@ path "kv/db/postgres/product-db-creds" {
 }
 EOF
 
-# TODO: have the user do this?
 vault policy write products-api /root/policies/products-api-policy.hcl
 
 exit 0
