@@ -154,7 +154,7 @@ challenges:
   - title: Vault UI
     type: service
     hostname: workstation
-    path: /ui/
+    path: /ui
     port: 30082
   - title: HashiCups Store
     type: service
@@ -169,17 +169,15 @@ challenges:
   title: Migrating Static Database Secrets
   teaser: Migrate your first secret from a shared mount to Vault.
   assignment: |-
-    When the HashiCups Store was audited, the auditors found, among other things,
-    that the Postgres Products database credentials were clearly visible to all
-    internal team members on a shared drive, at `/share/postgres-product-creds.txt`.
+    When the HashiCups Store was audited, the auditors found, among other
+    things, that the Postgres Products database credentials were clearly
+    visible to all internal team members on a shared drive, at
+    `/share/postgres-product-creds.txt`.
 
-    You should compare what is in the shared file and what you just read out of Vault.
-
-    ```
-    cat /share/postgres-product-creds.txt
-    ```
-
-    Then write the values to Vault.
+    This file is viewable in the "Shared Drive" tab.
+    Noting that what you read in the shared file and what is in Vault
+    do not match, you should make an update to the path in Vault with
+    the right credentials.
 
     ```
     vault kv put kv/db/postgres/product-db-creds \
@@ -187,10 +185,10 @@ challenges:
       password="password"
     ```
 
-    Once you have updated the static credentials, you should redeploy the app so
-    that it pulls the latest credentials.
+    Once you have made the updates, you should redeploy the app so that it
+    pulls the latest credentials.
 
-    As noted earlier, you are running everything in Kubernetes, so you
+    As noted earlier, you are running everything in Kubernetes, so yo
     will leverage the
     [Vault Agent Sidecar Injector](https://www.vaultproject.io/docs/platform/k8s/injector/)
     for Kubernetes. The Vault Agent leverages the
@@ -214,11 +212,11 @@ challenges:
     containers in the pod.
 
     You can see where your team specifies the path for the secret if you look
-    inside `products-api.yml`.
+    inside `products-api.yml` file, which you can find under the "k8s
+    Dir" tab.
 
-    ```
-    cat products-api.yml
-    ```
+    Look for `spec -> template -> metadata -> annotations -> vault.hashicorp.com.*`
+    to understand what is being read from Vault, and written to the local filesystem.
 
     Look for spec -> template -> metadata -> annotations -> vault.hashicorp.com.*
     to understand what is being read from Vault, and written to the local filesystem.
@@ -290,6 +288,14 @@ challenges:
   - title: Terminal
     type: terminal
     hostname: workstation
+  - title: Shared Drive
+    type: code
+    hostname: workstation
+    path: /share/
+  - title: k8s Dir
+    type: code
+    hostname: workstation
+    path: /root/k8s/
   - title: Vault UI
     type: service
     hostname: workstation
@@ -299,6 +305,11 @@ challenges:
     type: service
     hostname: workstation
     port: 30443
+  - title: HashiCups Store
+    type: service
+    hostname: workstation
+    path: /
+    port: 30090
   difficulty: basic
   timelimit: 420
 - slug: restricting-access-to-secrets-using-acls
@@ -314,13 +325,8 @@ challenges:
     to read secrets at that path.
 
     You have been provided with pre-written ACL policies - one for the DBA operator
-    and one for the HashiCups Products API. Take a look at them to see what they
-    will need to look like to make sure we have the right authorization.
-
-    ```
-    cat policies/dba-operator-policy.hcl
-    cat policies/products-api-policy.hcl
-    ```
+    and one for the HashiCups Products API. You can find them in the "Policies Dir"
+    tab.
 
     Once you feel comfortable you understand the policies, write them to Vault.
 
@@ -411,16 +417,15 @@ challenges:
   - title: Terminal
     type: terminal
     hostname: workstation
+  - title: Policies Dir
+    type: code
+    hostname: workstation
+    path: /root/policies/
   - title: Vault UI
     type: service
     hostname: workstation
     path: /ui/
     port: 30082
-  - title: Consul UI
-    type: service
-    hostname: workstation
-    path: /ui/
-    port: 30085
   - title: K8s UI
     type: service
     hostname: workstation
@@ -458,8 +463,6 @@ challenges:
     secrets engine to communicate with your Postgres server. You'll need to
     get the Cluster IP for the Postgres database, and you should also set the
     PG_USER and POSTGRESS_PASS variables for easy of use and clarity..
-
-    # TODO: Do this with Connect
 
     ```
     export PG_HOST=$(kubectl get svc -l app=postgres -o=json | jq -r '.items[0].spec.clusterIP')
@@ -501,7 +504,7 @@ challenges:
     when prompted.
 
     ```
-    psql -U YOUR_GENERATED_USERNAME -h $PG_HOST
+    psql -U YOUR_GENERATED_USERNAME -h $PG_HOST products
     ```
 
     If you can successfully log in,  then you have successfully configured Vault
@@ -588,11 +591,8 @@ challenges:
     secrets.
   assignment: |-
     The Products API deployment that you have been manipulating over the course
-    of this track is located at `/root/products-api.yml`. Take a look inside.
-
-    ```
-    less /root/products-api.yml
-    ```
+    of this track is located in `products-api.yml` in the "k8s Dir" tab. Open
+    it up and take a look.
 
     Look around for the string `agent-inject`. You'll notice a reference to a path
     to read from Vault, and template file that will be written to the host
@@ -625,7 +625,7 @@ challenges:
     Remembering what you learned about ACLs earlier in this track, modify
     `/root/policies/products-api-policy.hcl` and update the `products-api`
     policy in Vault to reflect the new path it should have access to read from.
-    Open up `/root/policies/products-api.hcl` and make it reflect the below
+    Open up `/root/policies/products-api-policy.hcl` and make it reflect the below
     policy.
 
     ```
@@ -658,22 +658,29 @@ challenges:
   notes:
   - type: text
     contents: |-
-      HashiCorp provides a tool called `vault-k8s` which leverages the Kubernetes
-      Mutating Admission Webhook to intercept and augment specifically annotated
-      pod configuration for secrets injection using Init and Sidecar containers.
+      HashiCorp provides a tool called
+      [`vault-k8s`](https://github.com/hashicorp/vault-k8s) which leverages the
+      Kubernetes Mutating Admission Webhook to intercept and augment
+      specifically annotated pod configuration for secrets injection using Init
+      and Sidecar containers.
 
-      Applications need only concern themselves with finding a secret at a filesystem
-      path, rather than managing tokens, connecting to an external API, or other
-      mechanisms for direct interaction with Vault.
+      Applications need only concern themselves with finding a secret at a
+      filesystem path, rather than managing tokens, connecting to an external
+      API, or other mechanisms for direct interaction with Vault.
   - type: text
     contents: |-
       For this challenge, you don't have to worry about installing the sidecar
-      injector. Instead, you will have to modify an existing Kubernetes deployment
-      spec file to read from the path that you just created in the previous challenge.
+      injector. Instead, you will have to modify an existing Kubernetes
+      deployment spec file to read from the path that you just created in the
+      previous challenge.
   tabs:
   - title: Terminal
     type: terminal
     hostname: workstation
+  - title: k8s Dir
+    type: code
+    hostname: workstation
+    path: /root/k8s/
   - title: Vault UI
     type: service
     hostname: workstation
@@ -690,4 +697,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 420
-checksum: "9261197163381580566"
+checksum: "16526484750079978516"
