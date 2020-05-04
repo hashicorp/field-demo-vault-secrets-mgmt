@@ -234,8 +234,6 @@ challenges:
     kubectl get deploy
     ```
 
-    You should notice that `products-api-deployment` shows `0/1`. **TODO**
-
     You should restart the `products-api-deployment`, you can do that with a single
     command.
 
@@ -567,11 +565,6 @@ challenges:
     hostname: workstation
     path: /ui/
     port: 30082
-  - title: Consul UI
-    type: service
-    hostname: workstation
-    path: /ui/
-    port: 30085
   - title: K8s UI
     type: service
     hostname: workstation
@@ -605,13 +598,13 @@ challenges:
     understand what you're doing with this command.
 
     ```
-    sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/products-api.yml
+    sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/k8s/products-api.yml
     ```
 
     Update the deployment in Kubernetes.
 
     ```
-    kubectl apply -f products-api.yml
+    kubectl apply -f k8s/products-api.yml
     ```
 
     Again, restart the deployment.
@@ -681,6 +674,10 @@ challenges:
     type: code
     hostname: workstation
     path: /root/k8s/
+  - title: Policies Dir
+    type: code
+    hostname: workstation
+    path: /root/policies/
   - title: Vault UI
     type: service
     hostname: workstation
@@ -697,4 +694,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 420
-checksum: "16526484750079978516"
+checksum: "6118396993049062517"

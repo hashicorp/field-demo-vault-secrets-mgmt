@@ -138,11 +138,15 @@ spec:
     nodePort: 30085
 EOF
 
+###########
+# Create a directory for the k8s .yaml files
+###########
+mkdir k8s/
 
 ###########
 # Set up Postgres Products DB Kubernetes Deployment
 ###########
-cat <<-EOF > /root/products-db.yml
+cat <<-EOF > /root/k8s/products-db.yml
 ---
 apiVersion: v1
 kind: Service
@@ -196,13 +200,13 @@ spec:
           emptyDir: {}
 EOF
 
-kubectl apply -f /root/products-db.yml
+kubectl apply -f /root/k8s/products-db.yml
 
 
 ###########
 # Set up Products API Kubernetes Deployment
 ###########
-cat <<-EOF > /root/products-api.yml
+cat <<-EOF > /root/k8s/products-api.yml
 ---
 # Service to expose web frontend
 apiVersion: v1
@@ -294,13 +298,13 @@ subjects:
     namespace: default
 EOF
 
-kubectl apply -f /root/products-api.yml
+kubectl apply -f /root/k8s/products-api.yml
 
 
 ###########
 # Set up Public API Kubernetes Deployment
 ###########
-cat <<-EOF > /root/public-api.yml
+cat <<-EOF > /root/k8s/public-api.yml
 ---
 apiVersion: v1
 kind: Service
@@ -363,14 +367,14 @@ spec:
               value: "http://localhost:9090"
 EOF
 
-kubectl apply -f /root/public-api.yml
+kubectl apply -f /root/k8s/public-api.yml
 
 
 ###########
 # Set up Frontend Kubernetes Deployment
 ###########
 
-cat <<-EOF > /root/frontend.yml
+cat <<-EOF > /root/k8s/frontend.yml
 ---
 apiVersion: v1
 kind: Service
@@ -454,7 +458,7 @@ spec:
               readOnly: true
 EOF
 
-kubectl apply -f /root/frontend.yml
+kubectl apply -f /root/k8s/frontend.yml
 
 
 
