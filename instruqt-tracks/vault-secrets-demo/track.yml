@@ -84,7 +84,7 @@ challenges:
       You are a DevOps engineer at HashiCups.
 
       HashiCups has recently been audited by regulators who determined that the
-      HashiCups Store app has a poor secrets management posture. For example.
+      HashiCups Store app has a poor secrets management posture. For example,
       the auditors found secrets for the app in plain text in git repos, shared
       mounts, and spreadsheets.
 
@@ -188,7 +188,7 @@ challenges:
     Once you have made the updates, you should redeploy the app so that it
     pulls the latest credentials.
 
-    As noted earlier, you are running everything in Kubernetes, so yo
+    As noted earlier, you are running everything in Kubernetes, so you
     will leverage the
     [Vault Agent Sidecar Injector](https://www.vaultproject.io/docs/platform/k8s/injector/)
     for Kubernetes. The Vault Agent leverages the
@@ -380,8 +380,8 @@ challenges:
       permissions before any user or machine can gain access.
   - type: text
     contents: |-
-      Vault uses policies to govern the the behavior of clients and implements
-      Role-Based Access Control (RBAC) by specifying access prvileges (_authorization_).
+      Vault uses policies to govern the behavior of clients and implements
+      Role-Based Access Control (RBAC) by specifying access privileges (_authorization_).
       Vault supports both [ACL policies](https://www.vaultproject.io/docs/concepts/policies.html)
       and [Sentinel policies](https://www.vaultproject.io/docs/enterprise/sentinel/index.html).
 
@@ -588,7 +588,7 @@ challenges:
     it up and take a look.
 
     Look around for the string `agent-inject`. You'll notice a reference to a path
-    to read from Vault, and template file that will be written to the host
+    to read from Vault, and a template file that will be written to the host
     Vault is deployed on.
 
     You need to update the path to reflect the one you created in the last
