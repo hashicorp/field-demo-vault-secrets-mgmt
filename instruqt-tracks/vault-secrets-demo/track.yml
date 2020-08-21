@@ -150,15 +150,15 @@ challenges:
   tabs:
   - title: Terminal
     type: terminal
-    hostname: workstation
+    hostname: kubernetes
   - title: Vault UI
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /ui
     port: 30082
   - title: HashiCups Store
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /
     port: 30090
   difficulty: basic
@@ -285,27 +285,27 @@ challenges:
   tabs:
   - title: Terminal
     type: terminal
-    hostname: workstation
+    hostname: kubernetes
   - title: Shared Drive
     type: code
-    hostname: workstation
+    hostname: kubernetes
     path: /share/
   - title: k8s Dir
     type: code
-    hostname: workstation
+    hostname: kubernetes
     path: /root/k8s/
   - title: Vault UI
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /ui/
     port: 30082
   - title: K8s UI
     type: service
-    hostname: workstation
+    hostname: kubernetes
     port: 30443
   - title: HashiCups Store
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /
     port: 30090
   difficulty: basic
@@ -414,23 +414,23 @@ challenges:
   tabs:
   - title: Terminal
     type: terminal
-    hostname: workstation
+    hostname: kubernetes
   - title: Policies Dir
     type: code
-    hostname: workstation
+    hostname: kubernetes
     path: /root/policies/
   - title: Vault UI
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /ui/
     port: 30082
   - title: K8s UI
     type: service
-    hostname: workstation
+    hostname: kubernetes
     port: 30443
   - title: HashiCups Store
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /
     port: 30090
   difficulty: basic
@@ -559,19 +559,19 @@ challenges:
   tabs:
   - title: Terminal
     type: terminal
-    hostname: workstation
+    hostname: kubernetes
   - title: Vault UI
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /ui/
     port: 30082
   - title: K8s UI
     type: service
-    hostname: workstation
+    hostname: kubernetes
     port: 30443
   - title: HashiCups Store
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /
     port: 30090
   difficulty: basic
@@ -669,29 +669,29 @@ challenges:
   tabs:
   - title: Terminal
     type: terminal
-    hostname: workstation
+    hostname: kubernetes
   - title: k8s Dir
     type: code
-    hostname: workstation
+    hostname: kubernetes
     path: /root/k8s/
   - title: Policies Dir
     type: code
-    hostname: workstation
+    hostname: kubernetes
     path: /root/policies/
   - title: Vault UI
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /ui/
     port: 30082
   - title: K8s UI
     type: service
-    hostname: workstation
+    hostname: kubernetes
     port: 30443
   - title: HashiCups Store
     type: service
-    hostname: workstation
+    hostname: kubernetes
     path: /
     port: 30090
   difficulty: basic
   timelimit: 420
-checksum: "6118396993049062517"
+checksum: "1091425787450088911"

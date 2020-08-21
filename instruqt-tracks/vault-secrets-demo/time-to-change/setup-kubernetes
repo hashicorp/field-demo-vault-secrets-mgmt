@@ -31,7 +31,7 @@ rm -f vault_1.3.1_linux_amd64.zip
 ###########
 # Wait for k3s to startup
 ###########
-sleep 20
+sleep 200
 
 
 ###########
