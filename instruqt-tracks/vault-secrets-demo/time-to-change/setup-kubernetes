@@ -29,18 +29,6 @@ rm -f vault_1.3.1_linux_amd64.zip
 
 
 ###########
-# Wait for k3s to startup
-###########
-sleep 200
-
-
-###########
-# Grab the Vault Helm Chart
-###########
-git clone --branch v0.3.3 https://github.com/hashicorp/vault-helm.git
-
-
-###########
 # Configure Vault Helm Chart values
 ###########
 
@@ -69,17 +57,11 @@ ui:
   serviceNodePort: 30082
 EOF
 
-
 ###########
-# Install Vault with Helm
+# Install Vault with the Helm Chart
 ###########
-helm install --wait --name hashicups-vault -f /root/vault-values.yaml vault-helm/
-
-
-###########
-# Grab the Consul Helm Chart
-###########
-git clone --branch v0.16.0 https://github.com/hashicorp/consul-helm.git
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm install vault hashicorp/vault --values /root/vault-values.yaml
 
 
 ###########
@@ -109,9 +91,9 @@ EOF
 
 
 ###########
-# Install Consul with Helm
+# Install Consul with the Helm Chart
 ###########
-helm install --wait --name hashicups -f /root/consul-values.yaml consul-helm/
+helm install -f /root/consul-values.yaml hashicorp hashicorp/consul
 
 
 ###########
