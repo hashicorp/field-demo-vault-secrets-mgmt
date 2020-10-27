@@ -2,7 +2,7 @@ version: 2
 jobs:
   validate:
     docker:
-      - image: ubuntu:latest
+      - image: docker.mirror.hashicorp.services/ubuntu:latest
     steps:
       - checkout
       - run:
@@ -30,7 +30,7 @@ jobs:
             done
   vault-secrets-mgmt:
     docker:
-      - image: ubuntu:latest
+      - image: docker.mirror.hashicorp.services/ubuntu:latest
     steps:
       - checkout
       - run:
