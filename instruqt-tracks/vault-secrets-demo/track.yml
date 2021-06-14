@@ -15,7 +15,7 @@ owner: hashicorp
 developers:
 - neil@hashicorp.com
 - lance@hashicorp.com
-private: false
+private: true
 published: true
 challenges:
 - slug: time-to-change
