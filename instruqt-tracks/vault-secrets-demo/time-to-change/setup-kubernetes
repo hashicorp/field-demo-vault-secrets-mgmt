@@ -43,7 +43,6 @@ git clone --branch v0.3.3 https://github.com/hashicorp/vault-helm.git
 ###########
 # Configure Vault Helm Chart values
 ###########
-
 cat <<-EOF > /root/vault-values.yaml
 server:
   dev:

@@ -1,7 +1,7 @@
-slug: vault-demo-app
+slug: vault-managing-secrets-and-moving-to-cloud
 id: gc5ak3quhakx
 type: track
-title: HashiCups Store (Vault Challenge Scenario)
+title: 'Vault: Managing Secrets and Moving to Cloud'
 teaser: Help get HashiCups, Inc. into regulatory compliance.
 description: HashiCups, Inc. has been caught with bad secrets management practices
   by independent auditors. Learn how to migrate old application secrets and get HashiCups,
@@ -24,60 +24,6 @@ challenges:
   title: Time to Change
   teaser: Busted! Secrets at HashiCups, Inc. are not centralized or governed. It's
     time to change.
-  assignment: |-
-    The [root token](https://www.vaultproject.io/docs/concepts/tokens/) for
-    this Vault installation is simply "root". Using the root token, you'll have
-    full access to Vault to begin this challenge. You can log in using the
-    [`vault login`](https://www.vaultproject.io/docs/commands/login/) command,
-    or using the token in the UI.
-
-    ---
-
-    Though your team has already deployed all of the components of the HashiCups
-    Store into Kubernetes already, when you open up the HashiCups Store tab,
-    you see the app is showing "`Error :(`".
-
-    The secrets used to connect each component must not have been migrated
-    over to Vault correctly. You know your team member has already migrated the
-    secret into Vault, but you don't know at what path it is stored.
-
-    Everything in Vault is path based, so the first thing you will need to do
-    is find out at what path the `kv` secrets engine is mounted.
-
-    ```
-    vault secrets list
-    ```
-
-    Notice that the `kv` secrets engine is mounted at the path `kv/`. Next, you
-    need to list the keys of that `kv` mount until you find the Customer Profile
-    Postgres database credentials.
-
-    ```
-    vault kv list kv
-    ```
-
-    Note that there is a key inside the `kv` mount already (`db`). Continue digging
-    using `vault kv list` to get familiar with path based secrets.
-
-    ```
-    vault kv list kv/db
-    vault kv list kv/db/postgres
-    ```
-
-    You can also open up the Vault UI tab, type "root" into the Token auth method, and
-    log in to visually browse the `kv` mount.
-
-    Since you know the `products-api` needs to talk to the `postgres` service,
-    you should start there. You can read a secret with the `read` command.
-
-    ```
-    vault read kv/db/postgres/product-db-creds
-    ```
-
-    Something about the password doesn't look right...
-
-    Now that you have an idea of how path based secrets are laid out in Vault's
-    `kv` secrets engine, let's start fixing the HashiCups store.
   notes:
   - type: text
     contents: |-
@@ -147,6 +93,60 @@ challenges:
 
       Because this has already been configured, you don't have to worry about how
       the Kubernetes pods in the next steps are authenticating to Vault.
+  assignment: |-
+    The [root token](https://www.vaultproject.io/docs/concepts/tokens/) for
+    this Vault installation is simply "root". Using the root token, you'll have
+    full access to Vault to begin this challenge. You can log in using the
+    [`vault login`](https://www.vaultproject.io/docs/commands/login/) command,
+    or using the token in the UI.
+
+    ---
+
+    Though your team has already deployed all of the components of the HashiCups
+    Store into Kubernetes already, when you open up the HashiCups Store tab,
+    you see the app is showing "`Error :(`".
+
+    The secrets used to connect each component must not have been migrated
+    over to Vault correctly. You know your team member has already migrated the
+    secret into Vault, but you don't know at what path it is stored.
+
+    Everything in Vault is path based, so the first thing you will need to do
+    is find out at what path the `kv` secrets engine is mounted.
+
+    ```
+    vault secrets list
+    ```
+
+    Notice that the `kv` secrets engine is mounted at the path `kv/`. Next, you
+    need to list the keys of that `kv` mount until you find the Customer Profile
+    Postgres database credentials.
+
+    ```
+    vault kv list kv
+    ```
+
+    Note that there is a key inside the `kv` mount already (`db`). Continue digging
+    using `vault kv list` to get familiar with path based secrets.
+
+    ```
+    vault kv list kv/db
+    vault kv list kv/db/postgres
+    ```
+
+    You can also open up the Vault UI tab, type "root" into the Token auth method, and
+    log in to visually browse the `kv` mount.
+
+    Since you know the `products-api` needs to talk to the `postgres` service,
+    you should start there. You can read a secret with the `read` command.
+
+    ```
+    vault read kv/db/postgres/product-db-creds
+    ```
+
+    Something about the password doesn't look right...
+
+    Now that you have an idea of how path based secrets are laid out in Vault's
+    `kv` secrets engine, let's start fixing the HashiCups store.
   tabs:
   - title: Terminal
     type: terminal
@@ -168,6 +168,29 @@ challenges:
   type: challenge
   title: Migrating Static Database Secrets
   teaser: Migrate your first secret from a shared mount to Vault.
+  notes:
+  - type: text
+    contents: |-
+      The first secret that needs your attention is the credential set for the
+      Products database. These credentials are used by the HashiCups Store's
+      Product API service to pull in all of the products available to consumers.
+
+      The credentials are currently stored in a text file on a shared mount.
+      All of your team members at HashiCups have access to this shared mount,
+      and whenever you need to deploy the app, a DBA SSHes into a box, references
+      the file in the shared mount, and updates the app.
+  - type: text
+    contents: |-
+      This has caused a major issue for the auditors. You need to make sure that
+      the credentials have been migrated correctly from the filesystem to Vault.
+      Once you've done that, you need to make sure that only the identities that
+      need access can access the secret, and then you should make the secret
+      dynamic.
+
+      More on that later.
+
+      Your first task is to make sure those shared database credentials are correctly
+      input into Vault.
   assignment: |-
     When the HashiCups Store was audited, the auditors found, among other
     things, that the Postgres Products database credentials were clearly
@@ -259,29 +282,6 @@ challenges:
 
     Now that the secret is protected by Vault, you've taken one step in the right
     direction towards good secrets management hygiene.
-  notes:
-  - type: text
-    contents: |-
-      The first secret that needs your attention is the credential set for the
-      Products database. These credentials are used by the HashiCups Store's
-      Product API service to pull in all of the products available to consumers.
-
-      The credentials are currently stored in a text file on a shared mount.
-      All of your team members at HashiCups have access to this shared mount,
-      and whenever you need to deploy the app, a DBA SSHes into a box, references
-      the file in the shared mount, and updates the app.
-  - type: text
-    contents: |-
-      This has caused a major issue for the auditors. You need to make sure that
-      the credentials have been migrated correctly from the filesystem to Vault.
-      Once you've done that, you need to make sure that only the identities that
-      need access can access the secret, and then you should make the secret
-      dynamic.
-
-      More on that later.
-
-      Your first task is to make sure those shared database credentials are correctly
-      input into Vault.
   tabs:
   - title: Terminal
     type: terminal
@@ -316,6 +316,45 @@ challenges:
   title: Restricting Access to Secrets Using ACLs
   teaser: Now that you've fixed your first Vault secret, make sure only the right
     identities can read it.
+  notes:
+  - type: text
+    contents: |-
+      Vault centrally secures, stores, and controls access to secrets across
+      distributed infrastructure and applications, so it is critical to control
+      permissions before any user or machine can gain access.
+  - type: text
+    contents: |-
+      Vault uses policies to govern the the behavior of clients and implements
+      Role-Based Access Control (RBAC) by specifying access prvileges (_authorization_).
+      Vault supports both [ACL policies](https://www.vaultproject.io/docs/concepts/policies.html)
+      and [Sentinel policies](https://www.vaultproject.io/docs/enterprise/sentinel/index.html).
+
+      This challenge focuses on ACL policies.
+  - type: text
+    contents: |-
+      When you first initialize Vault, the root policy is created by default. The
+      [root policy](https://www.vaultproject.io/docs/concepts/policies/#root-policy)
+      is a special policy that gives superuser access to everything in Vault.
+      This allows the superuser to set up the initial policies, auth methods,
+      etc.
+
+      This is the policy you have been using up until now.
+  - type: text
+    contents: |-
+      Since Vault enforces the principle of "least-privileged access" you should
+      scope the access to be as limited as possible.
+
+      As you have already seen - everything in Vault is path based.
+
+      Admins write policies to grant or forbid access to certain paths and operations
+      in Vault. Vault operates on a *secure by default standard*, and as such, an empty
+      policy grants no permissions in the system.
+  - type: text
+    contents: |-
+      There are two roles at HashiCups that will need access to these secrets.
+      The DBA team (`dba-operator`) will need to be able to perform all CRUD operations
+      on the Postgres creds path, and the Products API (`products-api`) only needs
+      to read the secrets at that path.
   assignment: |-
     There are two primary roles that need to access the Customer Profile database: DBAs
     (`dba-operators`) and the Products API (`products-api`) itself. The DBAs should be able to
@@ -372,45 +411,6 @@ challenges:
 
     If you can read the credentials but get denied on the `not-db` path, you have
     successfully set up the DBA Operator ACLs.
-  notes:
-  - type: text
-    contents: |-
-      Vault centrally secures, stores, and controls access to secrets across
-      distributed infrastructure and applications, so it is critical to control
-      permissions before any user or machine can gain access.
-  - type: text
-    contents: |-
-      Vault uses policies to govern the the behavior of clients and implements
-      Role-Based Access Control (RBAC) by specifying access prvileges (_authorization_).
-      Vault supports both [ACL policies](https://www.vaultproject.io/docs/concepts/policies.html)
-      and [Sentinel policies](https://www.vaultproject.io/docs/enterprise/sentinel/index.html).
-
-      This challenge focuses on ACL policies.
-  - type: text
-    contents: |-
-      When you first initialize Vault, the root policy is created by default. The
-      [root policy](https://www.vaultproject.io/docs/concepts/policies/#root-policy)
-      is a special policy that gives superuser access to everything in Vault.
-      This allows the superuser to set up the initial policies, auth methods,
-      etc.
-
-      This is the policy you have been using up until now.
-  - type: text
-    contents: |-
-      Since Vault enforces the principle of "least-privileged access" you should
-      scope the access to be as limited as possible.
-
-      As you have already seen - everything in Vault is path based.
-
-      Admins write policies to grant or forbid access to certain paths and operations
-      in Vault. Vault operates on a *secure by default standard*, and as such, an empty
-      policy grants no permissions in the system.
-  - type: text
-    contents: |-
-      There are two roles at HashiCups that will need access to these secrets.
-      The DBA team (`dba-operator`) will need to be able to perform all CRUD operations
-      on the Postgres creds path, and the Products API (`products-api`) only needs
-      to read the secrets at that path.
   tabs:
   - title: Terminal
     type: terminal
@@ -441,6 +441,32 @@ challenges:
   title: Static to Dynamic Database Secrets
   teaser: No more shared passwords - set up Vault to generate dynamic secrets for
     the Products database.
+  notes:
+  - type: text
+    contents: |-
+      Now, you already moved the database credentials for the Products API from
+      a file to Vault, but it would be even better if you didn't have to use
+      the same credentials, and could generate them on the fly.
+  - type: text
+    contents: |-
+      Unlike the KV secrets engine where you had to put data into the store
+      yourself, dynamic secrets are generated when they are accessed. Dynamic
+      secrets do not exist until they are read, so there is no risk of someone
+      stealing them or another client using the same secrets.
+  - type: text
+    contents: |-
+      With every dynamic secret, Vault creates a _lease_: metadata containing
+      information such as TTL, renewability, and more. When a lease expires,
+      Vault automatically revokes the dynamic secret, and the consumer of the
+      secret can no longer be certain that it is valid. This minimizes the
+      amount of time the secret exists.
+  - type: text
+    contents: |-
+      The `database` secrets engine can generate database credentials
+      dynamically based on configured roles. With each request, a unique
+      username and password pair are generated and returned.
+
+      That will be the focus of this challenge.
   assignment: |-
     In order to generate dynamic secrets for Postgres, the first thing you'll
     need to enable is the `database` secrets engine.
@@ -530,32 +556,6 @@ challenges:
 
     You have successfully configured Vault for dynamic secrets, and eliminated another
     potential security issue by deleting the old credentials and rotating them in Vault.
-  notes:
-  - type: text
-    contents: |-
-      Now, you already moved the database credentials for the Products API from
-      a file to Vault, but it would be even better if you didn't have to use
-      the same credentials, and could generate them on the fly.
-  - type: text
-    contents: |-
-      Unlike the KV secrets engine where you had to put data into the store
-      yourself, dynamic secrets are generated when they are accessed. Dynamic
-      secrets do not exist until they are read, so there is no risk of someone
-      stealing them or another client using the same secrets.
-  - type: text
-    contents: |-
-      With every dynamic secret, Vault creates a _lease_: metadata containing
-      information such as TTL, renewability, and more. When a lease expires,
-      Vault automatically revokes the dynamic secret, and the consumer of the
-      secret can no longer be certain that it is valid. This minimizes the
-      amount of time the secret exists.
-  - type: text
-    contents: |-
-      The `database` secrets engine can generate database credentials
-      dynamically based on configured roles. With each request, a unique
-      username and password pair are generated and returned.
-
-      That will be the focus of this challenge.
   tabs:
   - title: Terminal
     type: terminal
@@ -582,6 +582,24 @@ challenges:
   title: Vault Agent with Kubernetes
   teaser: Modify a Kubernetes deployment file to leverage the Vault agent and inject
     secrets.
+  notes:
+  - type: text
+    contents: |-
+      HashiCorp provides a tool called
+      [`vault-k8s`](https://github.com/hashicorp/vault-k8s) which leverages the
+      Kubernetes Mutating Admission Webhook to intercept and augment
+      specifically annotated pod configuration for secrets injection using Init
+      and Sidecar containers.
+
+      Applications need only concern themselves with finding a secret at a
+      filesystem path, rather than managing tokens, connecting to an external
+      API, or other mechanisms for direct interaction with Vault.
+  - type: text
+    contents: |-
+      For this challenge, you don't have to worry about installing the sidecar
+      injector. Instead, you will have to modify an existing Kubernetes
+      deployment spec file to read from the path that you just created in the
+      previous challenge.
   assignment: |-
     The Products API deployment that you have been manipulating over the course
     of this track is located in `products-api.yml` in the "k8s Dir" tab. Open
@@ -648,24 +666,6 @@ challenges:
     You should now be able to refresh the HashiCups UI and see the products.
     You are now using dynamic credentials, and the root credentials are no
     longer known by anyone on your team.
-  notes:
-  - type: text
-    contents: |-
-      HashiCorp provides a tool called
-      [`vault-k8s`](https://github.com/hashicorp/vault-k8s) which leverages the
-      Kubernetes Mutating Admission Webhook to intercept and augment
-      specifically annotated pod configuration for secrets injection using Init
-      and Sidecar containers.
-
-      Applications need only concern themselves with finding a secret at a
-      filesystem path, rather than managing tokens, connecting to an external
-      API, or other mechanisms for direct interaction with Vault.
-  - type: text
-    contents: |-
-      For this challenge, you don't have to worry about installing the sidecar
-      injector. Instead, you will have to modify an existing Kubernetes
-      deployment spec file to read from the path that you just created in the
-      previous challenge.
   tabs:
   - title: Terminal
     type: terminal
@@ -694,4 +694,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 420
-checksum: "1091425787450088911"
+checksum: "7075854815175866597"
