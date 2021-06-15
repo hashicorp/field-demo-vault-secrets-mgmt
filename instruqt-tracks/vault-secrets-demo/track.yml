@@ -27,16 +27,16 @@ challenges:
   notes:
   - type: text
     contents: |-
-      You are a DevOps engineer at HashiCups.
+      You are a DevOps engineer at HashiCups, Inc.
 
       HashiCups has recently been audited by regulators who determined that the
-      HashiCups Store app has a poor secrets management posture. For example.
-      the auditors found secrets for the app in plain text in git repos, shared
-      mounts, and spreadsheets.
+      HashiCups Store app has a poor secrets management posture. For example,
+      the auditors found secrets for the HashiCups app in plain text in git
+      repos, shared mounts, and spreadsheets.
 
       To satisfy the regulators and auditors, HashiCups has decided to adopt
       Vault as a centralized secrets management service. Your team has been
-      tasked with migrating from your legacy secrets storage to the new, Vault
+      tasked with migrating from your legacy secrets storage to the new Vault
       secrets management solution.
   - type: text
     contents: |-
@@ -324,8 +324,8 @@ challenges:
       permissions before any user or machine can gain access.
   - type: text
     contents: |-
-      Vault uses policies to govern the the behavior of clients and implements
-      Role-Based Access Control (RBAC) by specifying access prvileges (_authorization_).
+      Vault uses policies to govern the behavior of clients and implements
+      Role-Based Access Control (RBAC) by specifying access privileges (_authorization_).
       Vault supports both [ACL policies](https://www.vaultproject.io/docs/concepts/policies.html)
       and [Sentinel policies](https://www.vaultproject.io/docs/enterprise/sentinel/index.html).
 
@@ -588,7 +588,7 @@ challenges:
       HashiCorp provides a tool called
       [`vault-k8s`](https://github.com/hashicorp/vault-k8s) which leverages the
       Kubernetes Mutating Admission Webhook to intercept and augment
-      specifically annotated pod configuration for secrets injection using Init
+      specifically annotated pod configuration for secret injection using Init
       and Sidecar containers.
 
       Applications need only concern themselves with finding a secret at a
