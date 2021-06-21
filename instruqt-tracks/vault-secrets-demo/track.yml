@@ -162,7 +162,7 @@ challenges:
     path: /
     port: 30090
   difficulty: basic
-  timelimit: 240
+  timelimit: 1320
 - slug: migrating-static-database-secrets
   id: 3wunlrlkq2nz
   type: challenge
@@ -309,7 +309,7 @@ challenges:
     path: /
     port: 30090
   difficulty: basic
-  timelimit: 420
+  timelimit: 1320
 - slug: restricting-access-to-secrets-using-acls
   id: zmkod8j9pbw1
   type: challenge
@@ -434,7 +434,7 @@ challenges:
     path: /
     port: 30090
   difficulty: basic
-  timelimit: 420
+  timelimit: 1320
 - slug: static-to-dynamic-database-secrets
   id: atiz2lovvrka
   type: challenge
@@ -575,7 +575,7 @@ challenges:
     path: /
     port: 30090
   difficulty: basic
-  timelimit: 600
+  timelimit: 1320
 - slug: vault-agent-with-kubernetes
   id: mn20qfq1soij
   type: challenge
@@ -693,5 +693,5 @@ challenges:
     path: /
     port: 30090
   difficulty: basic
-  timelimit: 420
-checksum: "7075854815175866597"
+  timelimit: 1320
+checksum: "11438734146658123619"
