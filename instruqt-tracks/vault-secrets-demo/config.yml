@@ -1,6 +1,6 @@
 version: "2"
 virtualmachines:
 - name: kubernetes
-  image: instruqt-hashicorp/kubernetes-base-1-0
+  image: instruqt-hashicorp/kubernetes-base-helm3-1-0
   shell: /bin/bash
   machine_type: n1-standard-2
