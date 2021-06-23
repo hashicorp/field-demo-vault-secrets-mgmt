@@ -17,6 +17,7 @@ developers:
 - lance@hashicorp.com
 private: true
 published: true
+maintenance: true
 challenges:
 - slug: time-to-change
   id: xegkefzbeka5
@@ -694,4 +695,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 1320
-checksum: "3174071100087845756"
+checksum: "6760563348184963592"
