@@ -3,6 +3,7 @@
 ###########
 # Install Postgres client for testing
 ###########
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo apt-get update
 sudo apt-get install -y postgresql-client
 apt install postgresql-client-common
@@ -11,7 +12,7 @@ apt install postgresql-client-common
 ###########
 # Install Consul Client
 ###########
-CONSUL_VERSION=1.10.0
+CONSUL_VERSION=1.9.7
 wget https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip
 unzip consul_${CONSUL_VERSION}_linux_amd64.zip
 mv consul /usr/local/bin/consul
@@ -34,7 +35,15 @@ rm -f vault_${VAULT_VERSION}_linux_amd64.zip
 # Configure Vault Helm Chart values
 ###########
 cat <<-EOF > /root/vault-values.yaml
+injector:
+  agentImage:
+    repository: "hashicorp/vault"
+    tag: "1.7.3"
 server:
+  image:
+    repository: "hashicorp/vault"
+    tag: "1.7.3"
+    pullPolicy: IfNotPresent
   dev:
     enabled: true
   standalone:
@@ -62,7 +71,7 @@ EOF
 # Install Vault with the Helm Chart
 ###########
 helm repo add hashicorp https://helm.releases.hashicorp.com
-helm install --wait vault hashicorp/vault --values /root/vault-values.yaml
+helm install --wait vault hashicorp/vault --values /root/vault-values.yaml --version 0.11.0
 
 
 ###########
@@ -71,8 +80,8 @@ helm install --wait vault hashicorp/vault --values /root/vault-values.yaml
 cat <<-EOF > /root/consul-values.yaml
 global:
   datacenter: dc1
-  image: "consul:1.10.0"
-  imageK8S: "hashicorp/consul-k8s:0.26.0"
+  image: "consul:1.9.7"
+  imageK8S: "hashicorp/consul-k8s:0.25.0"
 server:
   replicas: 1
   bootstrapExpect: 1
@@ -94,7 +103,7 @@ EOF
 ###########
 # Install Consul with the Helm Chart
 ###########
-helm install --wait -f /root/consul-values.yaml hashicorp hashicorp/consul
+helm install --wait -f /root/consul-values.yaml hashicorp hashicorp/consul --version 0.31.1
 
 
 ###########
@@ -234,6 +243,7 @@ spec:
         prometheus.io/scrape: "true"
         consul.hashicorp.com/connect-inject: "true"
         consul.hashicorp.com/connect-service-upstreams: "postgres:5432"
+        vault.hashicorp.com/log-level: "debug"
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/agent-inject-secret-db-creds: "kv/db/postgres/product-db-creds"
         vault.hashicorp.com/agent-inject-template-db-creds: |
@@ -488,8 +498,6 @@ vault write auth/kubernetes/role/$SA_NAME \
 ###########
 # Seed Secrets
 ###########
-vault secrets enable kv
-
 # Create the KV secrets engine for static secrets
 vault secrets enable -path="kv" kv
 
