@@ -208,7 +208,7 @@ challenges:
     Once you have made the updates, you should redeploy the app so that it
     pulls the latest credentials.
 
-    As noted earlier, you are running everything in Kubernetes, so yo
+    As noted earlier, you are running everything in Kubernetes, so you
     will leverage the
     [Vault Agent Sidecar Injector](https://www.vaultproject.io/docs/platform/k8s/injector/)
     for Kubernetes. The Vault Agent leverages the
@@ -600,7 +600,7 @@ challenges:
     it up and take a look.
 
     Look around for the string `agent-inject`. You'll notice a reference to a path
-    to read from Vault, and template file that will be written to the host
+    to read from Vault, and a template file that will be written to the host
     Vault is deployed on.
 
     You need to update the path to reflect the one you created in the last
