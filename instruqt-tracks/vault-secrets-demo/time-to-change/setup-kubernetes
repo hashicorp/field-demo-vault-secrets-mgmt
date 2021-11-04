@@ -522,12 +522,6 @@ path "kv/db/*" {
 }
 EOF
 
-tee /root/policies/operator-policy.hcl <<EOF
-path "kv/api/*" {
-  capabilities = ["list", "read", "create", "update"]
-}
-EOF
-
 tee /root/policies/security-policy.hcl <<EOF
 path "kv/db/*" {
   capabilities = ["read"]

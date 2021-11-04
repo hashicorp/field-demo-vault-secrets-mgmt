@@ -13,6 +13,7 @@ owner: hashicorp
 developers:
 - neil@hashicorp.com
 - lance@hashicorp.com
+- roger@hashicorp.com
 private: true
 published: true
 challenges:
@@ -91,7 +92,7 @@ challenges:
       Because this has already been configured, you don't have to worry about how
       the Kubernetes pods in the next steps are authenticating to Vault.
   assignment: |-
-    The [root token](https://www.vaultproject.io/docs/concepts/tokens/) for
+    The [root token](https://www.vaultproject.io/docs/concepts/tokens#root-tokens) for
     this Vault installation is simply "root". Using the root token, you'll have
     full access to Vault to begin this challenge. You can log in using the
     [`vault login`](https://www.vaultproject.io/docs/commands/login/) command,
@@ -100,7 +101,7 @@ challenges:
     ---
 
     Though your team has already deployed all of the components of the HashiCups
-    Store into Kubernetes already, when you open up the HashiCups Store tab,
+    Store into Kubernetes, when you open up the HashiCups Store tab,
     you see the app is showing "`Error :(`".
 
     The secrets used to connect each component must not have been migrated
@@ -347,13 +348,13 @@ challenges:
       policy grants no permissions in the system.
   - type: text
     contents: |-
-      There are two roles at HashiCups that will need access to these secrets.
-      The DBA team (`dba-operator`) will need to be able to perform all CRUD operations
+      There are two roles at HashiCups that need access to these secrets.
+      The DBA team (`dba-operator`) needs to be able to perform all CRUD operations
       on the Postgres creds path, and the Products API (`products-api`) only needs
       to read the secrets at that path.
   assignment: |-
     There are two primary roles that need to access the Customer Profile database: DBAs
-    (`dba-operators`) and the Products API (`products-api`) itself. The DBAs should be able to
+    (`dba-operator`) and the Products API (`products-api`) itself. The DBAs should be able to
     perform all operations on the `kv/database/` path. The web service should only be able
     to read secrets at that path.
 
@@ -361,16 +362,17 @@ challenges:
     and one for the HashiCups Products API. You can find them in the "Policies Dir"
     tab.
 
-    Once you feel comfortable you understand the policies, write them to Vault.
+    The products-api-policy.hcl file was already used by a setup script in the first challenge to create the `products-api` policy in Vault since it was needed to fix the HashiCups app in the previous challenge.
+
+    Once you understand the policies, write the `dba-operator` policy to Vault.
 
     ```
     vault policy write dba-operator policies/dba-operator-policy.hcl
-    vault policy write products-api policies/products-api-policy.hcl
     ```
 
     ---
 
-    Now that the policies are in place for your users and applications, you
+    Now that both of the required policies are in place for your users and applications, you
     should enable the [Userpass auth method](https://www.vaultproject.io/docs/auth/userpass.html)
     and create some users for that auth method that leverage the policies
     you just created.
@@ -459,7 +461,7 @@ challenges:
     contents: |-
       The `database` secrets engine can generate database credentials
       dynamically based on configured roles. With each request, a unique
-      username and password pair are generated and returned.
+      username and password pair is generated and returned.
 
       That will be the focus of this challenge.
   assignment: |-
@@ -523,11 +525,13 @@ challenges:
     when prompted.
 
     ```
-    psql -U YOUR_GENERATED_USERNAME -h $PG_HOST products
+    psql -U <YOUR_GENERATED_USERNAME> -h $PG_HOST products
     ```
 
     If you can successfully log in,  then you have successfully configured Vault
     for dynamic database credentials and are ready to move on.
+
+    Exit `psql` by typing `\q`.
 
     The last thing you want to do is rotate the root credential that you
     configured the database secret engine with, since you don't want anyone
@@ -537,7 +541,7 @@ challenges:
     vault write -force database/rotate-root/hashicups-pgsql
     ```
 
-    Confirm that you can no longer login with the credentials as before.
+    Confirm that you can no longer login with the credentials as before, typing "password" when prompted for the password of the postgres user.
 
     ```
     psql -U postgres -h $PG_HOST
@@ -625,6 +629,7 @@ challenges:
     kubectl rollout restart deployment products-api-deployment
     ```
 
+    Run `kubectl get deploy` until the products-api-deployment is ready.
     ---
 
     Remembering what you learned about ACLs earlier in this track, modify
@@ -657,6 +662,8 @@ challenges:
     kubectl rollout restart deployment products-api-deployment
     ```
 
+    Run `kubectl get deploy` until the products-api-deployment is ready.
+
     You should now be able to refresh the HashiCups UI and see the products.
     You are now using dynamic credentials, and the root credentials are no
     longer known by anyone on your team.
@@ -688,4 +695,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 1320
-checksum: "8081165513364629995"
+checksum: "6170689148753901987"
