@@ -74,10 +74,11 @@ challenges:
         - [`postgres`](https://github.com/hashicorp-demoapp/postgres)
           - A PostgreSQL database that contains the HashiCups products
 
-      On the next note, you can see how all the components interact. Don't worry
-      about remembering it all now, we'll address them each in this track.
+      On the next note, you can see how all the components interact. Note that Consul is used for service discovery.
+      Don't worry about remembering it all now, we'll address them
+      each in this track.
   - type: text
-    contents: '![HashiCups Reference Architecture Diagram](https://github.com/hashicorp/field-demo-vault-secrets-mgmt/raw/master/images/infa.png)'
+    contents: '![HashiCups Reference Architecture Diagram](https://github.com/hashicorp/field-demo-vault-secrets-mgmt/raw/master/images/infra-new.png)'
   - type: text
     contents: |-
       Your team has already deployed all of the components of the HashiCups
@@ -695,4 +696,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 1320
-checksum: "6170689148753901987"
+checksum: "2825140028975419184"
