@@ -3,8 +3,10 @@ id: gc5ak3quhakx
 type: track
 title: 'Vault: Managing Secrets and Moving to Cloud'
 teaser: Help get HashiCups, Inc. into regulatory compliance.
-description: HashiCups, Inc. has been caught with bad secrets management practices by independent auditors. Learn how to migrate old application secrets and get HashiCups, Inc. compliant.
-icon: https://storage.googleapis.com/instruqt-frontend/assets/hashicorp/tracks/vault.png
+description: HashiCups, Inc. has been caught with bad secrets management practices
+  by independent auditors. Learn how to migrate old application secrets and get HashiCups,
+  Inc. compliant.
+icon: https://storage.googleapis.com/instruqt-hashicorp-tracks/logo/vault.png
 tags:
 - vault
 - aws
@@ -21,7 +23,8 @@ challenges:
   id: xegkefzbeka5
   type: challenge
   title: Time to Change
-  teaser: Busted! Secrets at HashiCups, Inc. are not centralized or governed. It's time to change.
+  teaser: Busted! Secrets at HashiCups, Inc. are not centralized or governed. It's
+    time to change.
   notes:
   - type: text
     contents: |-
@@ -313,7 +316,8 @@ challenges:
   id: zmkod8j9pbw1
   type: challenge
   title: Restricting Access to Secrets Using ACLs
-  teaser: Now that you've fixed your first Vault secret, make sure only the right identities can read it.
+  teaser: Now that you've fixed your first Vault secret, make sure only the right
+    identities can read it.
   notes:
   - type: text
     contents: |-
@@ -438,7 +442,8 @@ challenges:
   id: atiz2lovvrka
   type: challenge
   title: Static to Dynamic Database Secrets
-  teaser: No more shared passwords - set up Vault to generate dynamic secrets for the Products database.
+  teaser: No more shared passwords - set up Vault to generate dynamic secrets for
+    the Products database.
   notes:
   - type: text
     contents: |-
@@ -580,7 +585,8 @@ challenges:
   id: mn20qfq1soij
   type: challenge
   title: Vault Agent with Kubernetes
-  teaser: Modify a Kubernetes deployment file to leverage the Vault agent and inject secrets.
+  teaser: Modify a Kubernetes deployment file to leverage the Vault agent and inject
+    secrets.
   notes:
   - type: text
     contents: |-
@@ -696,4 +702,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 1320
-checksum: "2825140028975419184"
+checksum: "11305565824072050815"
