@@ -1,11 +1,13 @@
 #!/bin/bash -l
 
 # Replace Values in the Products API deployment with the new path we just configured.
-sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/products-api.yml
-sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/policies/products-api-policy.hcl
+sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/k8s/products-api.yml
 
 # Update the Products API deployment
-kubectl apply -f /root/products-api.yml
+kubectl apply -f /root/k8s/products-api.yml
+
+# Update the products-api-policy.hcl policy
+sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/policies/products-api-policy.hcl
 
 # Update the products-api policy
 vault policy write products-api policies/products-api-policy.hcl

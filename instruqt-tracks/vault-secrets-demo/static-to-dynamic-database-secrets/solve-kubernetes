@@ -1,13 +1,17 @@
 #!/bin/bash -l
 
-# Get the PG DB cluster IP, set the PG Vars
-export PG_HOST=$(kubectl get svc -l app=postgres -o=json | jq -r '.items[0].spec.clusterIP')
-# export PG_HOST="postgres.service.consul"
-export PG_USER=postgres
-export PG_PASS=password
+# Sleep
+sleep 15
 
 # Enable the Vault secrets engine
 vault secrets enable database
+
+# Get the PG DB cluster IP, set the PG Vars
+export PG_HOST=$(kubectl get svc -l app=postgres -o=json | jq -r '.items[0].spec.clusterIP')
+echo "PG_HOST is $PG_HOST"
+# export PG_HOST="postgres.service.consul"
+export PG_USER=postgres
+export PG_PASS=password
 
 # Configure Vault to communicate with the Postgres DB
 vault write database/config/hashicups-pgsql \
@@ -21,7 +25,7 @@ vault write database/config/hashicups-pgsql \
 vault write database/roles/products-api \
     db_name=hashicups-pgsql \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' SUPERUSER; \
-    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
     default_ttl="30m" \
     max_ttl="1h"
 
