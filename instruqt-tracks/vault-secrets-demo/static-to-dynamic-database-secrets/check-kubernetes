@@ -54,8 +54,14 @@ if [ ! "$?" = "2" ]; then
     fail-message "You did not rotate the root credential."
 fi
 
-
+# Check that the credentials have been removed from the KV engine
 old_username=$(vault read kv/db/postgres/product-db-creds -format=json | jq -r .data.username)
 if [ "$old_username" == "postgres" ]; then
     fail-message "You did not remove the old credentials from the kv engine."
+fi
+
+# Check that the old Products API deployment has been removed
+prod_api_lookup=$(kubectl get deployment -o json | jq -r '.items[] | select(.metadata.name == "products-api-deployment")')
+if [ ! "$prod_api_lookup" = "" ]; then
+    fail-message "You did not delete the old Products API deployment."
 fi

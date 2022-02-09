@@ -10,11 +10,6 @@ if [ ! "userpass" = "$type_at_userpass_path" ]; then
     fail-message "You haven't enabled the Userpass auth method yet."
 fi
 
-# Make sure the user unset the root token so they were forced to login with the DBA user
-if [ "$VAULT_TOKEN" = "root" ]; then
-    fail-message "You did not UNSET the VAULT_TOKEN."
-fi
-
 # Make sure that they logged in at least one time with the DBA Dan user
 num_userpass_login_leases=$(vault list -format=json sys/leases/lookup/auth/userpass/login | jq ". |  length")
 

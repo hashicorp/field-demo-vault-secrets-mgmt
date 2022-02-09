@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -l
 
 ###########
 # Install Postgres client for testing
@@ -133,7 +133,7 @@ EOF
 ###########
 # Create a directory for the k8s .yaml files
 ###########
-mkdir k8s/
+mkdir /root/k8s/
 
 ###########
 # Set up Postgres Products DB Kubernetes Deployment
