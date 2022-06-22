@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 # Write the necessary policies
-vault policy write dba-operator policies/dba-operator-policy.hcl
+vault policy write dba-operator /root/policies/dba-operator-policy.hcl
 
 # Enable the Userpass auth method
 vault auth enable userpass

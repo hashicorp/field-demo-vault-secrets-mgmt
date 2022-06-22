@@ -372,7 +372,7 @@ challenges:
     Once you understand the policies, write the `dba-operator` policy to Vault.
 
     ```
-    vault policy write dba-operator policies/dba-operator-policy.hcl
+    vault policy write dba-operator /root/policies/dba-operator-policy.hcl
     ```
 
     ---
@@ -639,7 +639,7 @@ challenges:
     challenge, `database/creds/products-api`.
 
     You can do that manually, or you can use this quick one-liner below, once
-    understand what you're doing with this command.
+    you understand what you're doing with this command.
 
     ```
     sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/k8s/products-api.yml
@@ -718,4 +718,4 @@ challenges:
     port: 30090
   difficulty: basic
   timelimit: 1320
-checksum: "4792350502726257261"
+checksum: "5157353505640036345"
