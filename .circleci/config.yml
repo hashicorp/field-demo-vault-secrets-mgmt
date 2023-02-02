@@ -75,14 +75,14 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
       - vault-secrets-mgmt:
           requires:
             - validate
           filters:
             branches:
               only:
-                - master
+                - main
   nightly-build:
     triggers:
       - schedule:
@@ -90,7 +90,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
     jobs:
       - validate
       - vault-secrets-mgmt:
