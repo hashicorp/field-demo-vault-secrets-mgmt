@@ -22,11 +22,8 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-
-      # Run the worker
-      - name: Run peloton_to_garmin worker via docker-compose
+      - name: Run Instruqt Validate
         env:
           INSTRUQT_TOKEN : ${{ secrets.INSTRUQT_TOKEN }}
           INSTRUQT_VERSION : ${{ secrets.INSTRUQT_VERSION }}
