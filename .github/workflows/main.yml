@@ -45,6 +45,6 @@ jobs:
             echo "Instruqt is installed and updated to most recent version."
           fi
           echo "Running instruqt track validate..."
-          for dir in $(ls -d /root/project/instruqt-tracks/*); do
+          for dir in $(sudo ls -d /root/project/instruqt-tracks/*); do
             cd $dir && sudo instruqt track validate
           done
