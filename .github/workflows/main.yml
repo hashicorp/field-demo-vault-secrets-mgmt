@@ -49,3 +49,46 @@ jobs:
           for dir in $(sudo ls -d /home/runner/work/field-demo-vault-secrets-mgmt/field-demo-vault-secrets-mgmt/instruqt-tracks/*); do
             cd $dir && instruqt track validate
           done
+  vault-secrets-mgmt:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v3
+      - name: Vault Secrets Mgmt Demo
+        env:
+          INSTRUQT_TOKEN : ${{ secrets.INSTRUQT_TOKEN }}
+          INSTRUQT_VERSION : ${{ secrets.INSTRUQT_VERSION }}
+        run: |
+          VERSION=$INSTRUQT_VERSION
+          apt -y update
+          apt -y install wget unzip
+          wget https://github.com/instruqt/cli/releases/download/${VERSION}/instruqt-linux-${VERSION}.zip -O /tmp/instruqt.zip
+          cd /tmp
+          unzip instruqt.zip
+          cp instruqt /usr/local/bin/instruqt
+          chmod +x /usr/local/bin/instruqt
+          echo "yes" | instruqt version
+          RETVAL=$?
+          if [[ $RETVAL -ne 0 ]]; then
+            echo "Instruqt is not installed correctly."
+            exit 1
+          else
+            echo "Instruqt is installed and updated to most recent version."
+          fi
+          cd /home/runner/work/field-demo-vault-secrets-mgmt/field-demo-vault-secrets-mgmt/instruqt-tracks/*
+          echo "Running instruqt track push..."
+          instruqt track push --force
+          echo "Running instruqt track test..."
+          # Retry instruqt track test up to 3 times
+          n=0
+          until [ $n -ge 3 ]; do
+            instruqt track test --skip-fail-check && break
+            n=$[$n+1]
+            sleep 5
+          done
+          if [ $n -ge 3 ]; then
+            echo "Instruqt track test failed three times."
+            exit 1
+          fi
