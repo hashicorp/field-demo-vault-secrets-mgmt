@@ -45,7 +45,7 @@ jobs:
             echo "Instruqt is installed and updated to most recent version."
           fi
           echo "Running instruqt track validate..."
-          sudo ls /home/runner/work/
+          sudo ls /home/runner/work/field-demo-vault-secrets-mgmt
           for dir in $(sudo ls -d /root/project/instruqt-tracks/*); do
             sudo cd $dir && sudo instruqt track validate
           done
