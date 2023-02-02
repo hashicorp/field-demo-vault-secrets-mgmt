@@ -46,5 +46,5 @@ jobs:
           fi
           echo "Running instruqt track validate..."
           for dir in $(ls -d /root/project/instruqt-tracks/*); do
-            cd $dir && instruqt track validate
+            cd $dir && sudo instruqt track validate
           done
