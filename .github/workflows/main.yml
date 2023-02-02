@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "" ]
+  pull_request:
+    branches: [ "main" ]
+
+  schedule:
+    - cron: "0 5 * * *"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "execute"
+  validate:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Run the worker
+      - name: Run peloton_to_garmin worker via docker-compose
+        env:
+          INSTRUQT_TOKEN : ${{ secrets.INSTRUQT_TOKEN }}
+          INSTRUQT_VERSION : ${{ secrets.INSTRUQT_VERSION }}
+        run: |
+          VERSION=$INSTRUQT_VERSION
+          apt -y update
+          apt -y install wget unzip
+          wget https://github.com/instruqt/cli/releases/download/${VERSION}/instruqt-linux-${VERSION}.zip -O /tmp/instruqt.zip
+          cd /tmp
+          unzip instruqt.zip
+          cp instruqt /usr/local/bin/instruqt
+          chmod +x /usr/local/bin/instruqt
+          echo "yes" | instruqt version
+          RETVAL=$?
+          if [[ $RETVAL -ne 0 ]]; then
+            echo "Instruqt is not installed correctly."
+            exit 1
+          else
+            echo "Instruqt is installed and updated to most recent version."
+          fi
+          echo "Running instruqt track validate..."
+          for dir in $(ls -d /root/project/instruqt-tracks/*); do
+            cd $dir && instruqt track validate
+          done
