@@ -47,5 +47,5 @@ jobs:
           echo "Running instruqt track validate..."
           sudo ls /home/runner/work/field-demo-vault-secrets-mgmt/field-demo-vault-secrets-mgmt/instruqt-tracks/*
           for dir in $(sudo ls -d /home/runner/work/field-demo-vault-secrets-mgmt/field-demo-vault-secrets-mgmt/instruqt-tracks/*); do
-            sudo cd $dir && sudo instruqt track validate
+            cd $dir && instruqt track validate
           done
