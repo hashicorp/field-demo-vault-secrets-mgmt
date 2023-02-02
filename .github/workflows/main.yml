@@ -47,7 +47,7 @@ jobs:
           echo "Running instruqt track validate..."
           sudo ls
           sudo ls /
-          sudo ls /root/
+          sudo ls /home
           for dir in $(sudo ls -d /root/project/instruqt-tracks/*); do
             sudo cd $dir && sudo instruqt track validate
           done
