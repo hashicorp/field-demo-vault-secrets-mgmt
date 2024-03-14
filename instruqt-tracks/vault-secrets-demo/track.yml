@@ -1,5 +1,4 @@
-slug: wip-vault-managing-secrets-and-moving-to-cloud
-id: lhagcl4xjvhj
+slug: wip-vcdl-614-vault-managing-secrets-and-moving-to-cloud
 title: 'Vault: Managing Secrets and Moving to Cloud'
 teaser: Help get HashiCups, Inc. into regulatory compliance.
 description: HashiCups, Inc. has been caught with bad secrets management practices
@@ -10,7 +9,7 @@ tags:
 - vault
 - demo-app
 - aws
-owner: hashicorp-field-ops
+owner: hashicorp
 developers:
 - neil@hashicorp.com
 - lance@hashicorp.com
@@ -25,4 +24,3 @@ lab_config:
   sidebar_enabled: true
   feedback_recap_enabled: true
   loadingMessages: true
-checksum: "4710057460708337736"
