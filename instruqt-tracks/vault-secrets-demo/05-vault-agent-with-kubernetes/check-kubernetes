@@ -1,0 +1,14 @@
+#!/bin/bash -l
+
+# Check that the Products API YAML file was updated to reflect the new Vault path
+PRODUCTS_API_YML=$(cat /root/k8s/products-api.yml)
+if [[ ! "$PRODUCTS_API_YML" = *"database/creds/products-api"* ]]; then
+    fail-message "You did not update /root/k8s/products-api.yml to reflect the new Vault path."
+fi
+
+PRODUCTS_API_POLICY_HCL=$(cat /root/policies/products-api-policy.hcl)
+if [[ ! "$PRODUCTS_API_POLICY_HCL" = *"database/creds/products-api"* ]]; then
+    fail-message "You did not update /root/policies/products-api.yml to reflect the new Vault path."
+fi
+
+# TODO checkl that it's running?

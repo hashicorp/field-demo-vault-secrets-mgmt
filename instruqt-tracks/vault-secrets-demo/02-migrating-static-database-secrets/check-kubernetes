@@ -1,0 +1,16 @@
+#!/bin/bash -l
+
+# Check that the user updated the password to the right password
+current_password=$(vault read -format=json kv/db/postgres/product-db-creds  | jq -r .data.password)
+if [ "$current_password" != "password" ]; then
+    fail-message "You did not correctly update the Postgres password. Check the value in Vault against the value in the shared credential file."
+fi
+
+# Check that the user restarted the Products API deployment
+grep -q "kubectl rollout restart deployment products-api-deployment" /root/.bash_history || fail-message "You did not restart the Product API deployment. Please restart it and try again."
+
+# Check the user removed the file from the "shared" mount
+SHARED_POSTGRES_CREDS_PATH=/share/postgres-product-creds.txt
+if [ -f "$SHARED_POSTGRES_CREDS_PATH" ]; then
+    fail-message "You did not remove the shared Postgres credential file. Remove the file in order to proceed."
+fi

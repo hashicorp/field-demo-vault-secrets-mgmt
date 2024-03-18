@@ -1,0 +1,11 @@
+#!/bin/bash -l
+
+# List the items mounted at kv/
+echo "vault kv list kv" >> /root/.bash_history
+vault kv list kv
+
+# Read the current Products db secret
+echo "vault read kv/db/postgres/product-db-creds" >> /root/.bash_history
+vault read kv/db/postgres/product-db-creds
+
+exit 0
