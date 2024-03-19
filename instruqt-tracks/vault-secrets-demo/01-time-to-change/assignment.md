@@ -1,6 +1,6 @@
 ---
 slug: time-to-change
-id: m7dqzx25bhi1
+id: oksjdltzgyap
 type: challenge
 title: Time to Change
 teaser: Busted! Secrets at HashiCups, Inc. are not centralized or governed. It's time
@@ -99,6 +99,10 @@ full access to Vault to begin this challenge. You can log in using the
 [`vault login`](https://www.vaultproject.io/docs/commands/login/) command,
 or using the token in the UI.
 
+```bash,run
+vault login
+```
+
 ---
 
 Though your team has already deployed all of the components of the HashiCups
@@ -112,7 +116,7 @@ secret into Vault, but you don't know at what path it is stored.
 Everything in Vault is path based, so the first thing you will need to do
 is find out at what path the `kv` secrets engine is mounted.
 
-```bash
+```bash,run
 vault secrets list
 ```
 
@@ -120,14 +124,14 @@ Notice that the `kv` secrets engine is mounted at the path `kv/`. Next, you
 need to list the keys of that `kv` mount until you find the Customer Profile
 Postgres database credentials.
 
-```bash
+```bash,run
 vault kv list kv
 ```
 
 Note that there is a key inside the `kv` mount already (`db`). Continue digging
 using `vault kv list` to get familiar with path based secrets.
 
-```bash
+```bash,run
 vault kv list kv/db
 vault kv list kv/db/postgres
 ```
@@ -138,7 +142,7 @@ log in to visually browse the `kv` mount.
 Since you know the `products-api` needs to talk to the `postgres` service,
 you should start there. You can read a secret with the `read` command.
 
-```bash
+```bash,run
 vault read kv/db/postgres/product-db-creds
 ```
 

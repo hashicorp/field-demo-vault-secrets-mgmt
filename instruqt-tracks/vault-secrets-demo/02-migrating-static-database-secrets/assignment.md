@@ -1,6 +1,6 @@
 ---
 slug: migrating-static-database-secrets
-id: fnn7aesf1eov
+id: 3cei7qkaeyqe
 type: challenge
 title: Migrating Static Database Secrets
 teaser: Migrate your first secret from a shared mount to Vault.
@@ -56,6 +56,7 @@ tabs:
 difficulty: basic
 timelimit: 1320
 ---
+
 When the HashiCups Store was audited, the auditors found, among other
 things, that the Postgres Products database credentials were clearly
 visible to all internal team members on a shared drive, at
@@ -105,7 +106,7 @@ Dir" tab.
 Look for `spec -> template -> metadata -> annotations -> vault.hashicorp.com.*`
 to understand what is being read from Vault, and written to the local filesystem.
 
-Look for spec -> template -> metadata -> annotations -> vault.hashicorp.com.*
+Look for spec -> template -> metadata -> annotations -> vault.hashicorp.com.\*
 to understand what is being read from Vault, and written to the local filesystem.
 
 Now that you understand how the Vault Agent Sidecar Injector for Kubernetes
@@ -116,20 +117,20 @@ Since we are running all of our components in Kubernetes, we can do that with
 
 You can see all of the deployments in your Kubernetes cluster.
 
-```bash
+```bash,run
 kubectl get deploy
 ```
 
 You should restart the `products-api-deployment`, you can do that with a single
 command.
 
-```bash
+```bash,run
 kubectl rollout restart deployment products-api-deployment
 ```
 
 Keep checking the deployment status until it's up and running.
 
-```bash
+```bash,run
 kubectl get deploy
 ```
 
@@ -139,7 +140,7 @@ and refresh the page. You should be able to see one of the HashiCups products no
 Now that you've migrated the credentials from the old shared file into Vault,
 remove it.
 
-```bash
+```bash,run
 rm /share/postgres-product-creds.txt
 ```
 

@@ -1,6 +1,14 @@
 #!/bin/bash -l
-
+set -euxo pipefail
+PS4='+$0[$LINENO]+ '
+export PS4
 set -e
+
+# VCDL-617 Hack - we need to remove this repository temporarily because this is based
+# on Ubuntu Xenial, which is EOL, which means the k8s repository for xenial no longer has
+# a releases file, so the apt-get update fails
+sudo rm -f /etc/apt/sources.list.d/kubernetes.list
+# END VCDL-617 Hack
 
 ###########
 # Install Postgres client for testing
@@ -69,53 +77,9 @@ EOF
 ###########
 # Install Vault with the Helm Chart
 ###########
-openssl genrsa -out injector-ca.key 2048
-openssl req \
-   -x509 \
-   -new \
-   -nodes \
-   -key injector-ca.key \
-   -sha256 \
-   -days 1825 \
-   -out injector-ca.crt \
-   -subj "/C=US/ST=CA/L=San Francisco/O=HashiCorp/CN=vault-agent-injector-svc"
-openssl genrsa -out tls.key 2048
-openssl req \
-   -new \
-   -key tls.key \
-   -out tls.csr \
-   -subj "/C=US/ST=CA/L=San Francisco/O=HashiCorp/CN=vault-agent-injector-svc"
-cat <<EOF >csr.conf
-authorityKeyIdentifier=keyid,issuer
-basicConstraints=CA:FALSE
-keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-subjectAltName = @alt_names
-
-[alt_names]
-DNS.1 = vault-agent-injector-svc
-DNS.2 = vault-agent-injector-svc.vault
-DNS.3 = vault-agent-injector-svc.vault.svc
-DNS.4 = vault-agent-injector-svc.vault.svc.cluster.local
-EOF
-openssl x509 \
-  -req \
-  -in tls.csr \
-  -CA injector-ca.crt \
-  -CAkey injector-ca.key \
-  -CAcreateserial \
-  -out tls.crt \
-  -days 1825 \
-  -sha256 \
-  -extfile csr.conf
-kubectl create secret generic injector-tls \
-    --from-file tls.crt \
-    --from-file tls.key
-export CA_BUNDLE=$(cat injector-ca.crt | base64)
 helm repo add hashicorp https://helm.releases.hashicorp.com
 helm install vault hashicorp/vault \
-  --wait --values /root/vault-values.yaml --version 0.11.0 \
-  --set="injector.certs.secretName=injector-tls" \
-  --set="injector.certs.caBundle=${CA_BUNDLE?}"
+  --wait --values /root/vault-values.yaml --version 0.11.0
 
 ###########
 # Configure Consul Helm Chart values

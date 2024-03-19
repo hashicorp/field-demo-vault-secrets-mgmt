@@ -5,13 +5,11 @@ export PG_HOST=$(kubectl get svc -l app=postgres -o=json | jq -r '.items[0].spec
 export PG_USER=postgres
 export PG_PASS=password
 
-
 # Check for DB secrets engine
 type_at_db_path=$(vault secrets list -format=json | jq -r '.["database/"]["type"]')
 if [ ! "$type_at_db_path" = "database" ]; then
     fail-message "You haven't enabled the Database secrets engine yet."
 fi
-
 
 # Check configuration has the right TTL and database name.
 CONFIG_JSON=$(vault read database/roles/products-api -format=json)
@@ -36,7 +34,6 @@ if [ ! "$create_statement" = "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{pa
     fail-message "You haven't properly configured Vault to map a Vault role a Postgres creation statement. Check the creation statement."
 fi
 
-
 # Generate dynamic credentials and confirm they have access
 CREDS_RESP=$(vault read database/creds/products-api -format=json)
 DYN_PG_USER=$(echo $CREDS_RESP | jq -r .data.username)
@@ -46,7 +43,6 @@ PGPASSWORD=$DYN_PG_PASS psql -h $PG_HOST -U $DYN_PG_USER -d postgres -c 'SELECT 
 if [ ! "$?" = "0" ]; then
     fail-message "The credentials you generated did not work against Postgres. Did you configure everything correctly?"
 fi
-
 
 # Check that the root credentials were rotated
 PGPASSWORD=password psql -h $PG_HOST -U postgres -d postgres -c 'SELECT 1'

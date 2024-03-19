@@ -1,6 +1,6 @@
 ---
 slug: restricting-access-to-secrets-using-acls
-id: rs7icnb7vy3f
+id: kdetbxsdjtsi
 type: challenge
 title: Restricting Access to Secrets Using ACLs
 teaser: Now that you've fixed your first Vault secret, make sure only the right identities
@@ -69,6 +69,7 @@ tabs:
 difficulty: basic
 timelimit: 1320
 ---
+
 There are two primary roles that need to access the Customer Profile database: DBAs
 (`dba-operator`) and the Products API (`products-api`) itself. The DBAs should be able to
 perform all operations on the `kv/database/` path. The web service should only be able
@@ -82,7 +83,7 @@ The products-api-policy.hcl file was already used by a setup script in the first
 
 Once you understand the policies, write the `dba-operator` policy to Vault.
 
-```
+```bash,run
 vault policy write dba-operator /root/policies/dba-operator-policy.hcl
 ```
 
@@ -93,14 +94,14 @@ should enable the [Userpass auth method](https://www.vaultproject.io/docs/auth/u
 and create some users for that auth method that leverage the policies
 you just created.
 
-```
+```bash,run
 vault auth enable userpass
 ```
 
 Create a user for Dan on the DBA team - call him `dba-dan`, and make sure that he gets
 the `dba-operator` policy.
 
-```
+```bash,run
 vault write auth/userpass/users/dba-dan password=dba-dan policies=dba-operator
 ```
 
@@ -109,7 +110,7 @@ with the `dba-dan` user and confirm the policies are correctly applied. Before y
 that, you'll have to unset the `VAULT_TOKEN` environment variable, otherwise it will
 take precedence over the `login` operation you are about to perform.
 
-```
+```bash,run
 unset VAULT_TOKEN
 vault login -method=userpass username=dba-dan password=dba-dan
 ```
@@ -118,7 +119,7 @@ Note the policy after logging in. Since you have logged in with the DBA user,
 you should be able to read the secret from the `kv/db/*` path, but not from any
 other path.
 
-```
+```bash,run
 vault read kv/db/postgres/product-db-creds
 vault read kv/not-db/
 ```

@@ -1,6 +1,6 @@
 ---
 slug: vault-agent-with-kubernetes
-id: iuqwoiynsyss
+id: nppvv9w2qx4v
 type: challenge
 title: Vault Agent with Kubernetes
 teaser: Modify a Kubernetes deployment file to leverage the Vault agent and inject
@@ -52,6 +52,7 @@ tabs:
 difficulty: basic
 timelimit: 1320
 ---
+
 The Products API deployment that you have been manipulating over the course
 of this track is located in `products-api.yml` in the "k8s Dir" tab. Open
 it up and take a look.
@@ -66,13 +67,13 @@ challenge, `database/creds/products-api`.
 You can do that manually, or you can use this quick one-liner below, once
 you understand what you're doing with this command.
 
-```
+```run
 sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/k8s/products-api.yml
 ```
 
 Update the deployment in Kubernetes.
 
-```
+```bash,run
 kubectl apply -f k8s/products-api.yml
 ```
 
@@ -86,7 +87,7 @@ policy in Vault to reflect the new path it should have access to read from.
 Open up `/root/policies/products-api-policy.hcl` and make it reflect the below
 policy.
 
-```
+```nocopy
 path "database/creds/products-api" {
   capabilities = ["read"]
 }
@@ -94,19 +95,19 @@ path "database/creds/products-api" {
 
 Once again, there is a one-liner you can use to achieve this.
 
-```
+```run
 sed -i 's/kv\/db\/postgres\/product-db-creds/database\/creds\/products-api/g' /root/policies/products-api-policy.hcl
 ```
 
 You'll then need to upload your changes to Vault.
 
-```
+```bash,run
 vault policy write products-api policies/products-api-policy.hcl
 ```
 
 Restart the deployment one last time.
 
-```
+```bash,run
 kubectl rollout restart deployment products-api-deployment
 ```
 

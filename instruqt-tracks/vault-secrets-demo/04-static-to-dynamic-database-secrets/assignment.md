@@ -1,6 +1,6 @@
 ---
 slug: static-to-dynamic-database-secrets
-id: vzosygehzqnv
+id: hats2ij0t8rr
 type: challenge
 title: Static to Dynamic Database Secrets
 teaser: No more shared passwords - set up Vault to generate dynamic secrets for the
@@ -52,10 +52,11 @@ tabs:
 difficulty: basic
 timelimit: 1320
 ---
+
 In order to generate dynamic secrets for Postgres, the first thing you'll
 need to enable is the `database` secrets engine.
 
-```
+```bash,run
 vault secrets enable database
 ```
 
@@ -63,7 +64,7 @@ Once it's enabled, we need to configure it to communicate with the Postgres
 database. We'll use the credentials that we put in the `kv` engine earlier
 in the next step.
 
-```
+```bash,run
 vault read kv/db/postgres/product-db-creds
 ```
 
@@ -72,13 +73,13 @@ secrets engine to communicate with your Postgres server. You'll need to
 get the Cluster IP for the Postgres database, and you should also set the
 PG_USER and POSTGRESS_PASS variables for easy of use and clarity..
 
-```
+```bash,run
 export PG_HOST=$(kubectl get svc -l app=postgres -o=json | jq -r '.items[0].spec.clusterIP')
 export PG_USER=postgres
 export PG_PASS=password
 ```
 
-```
+```bash,run
 vault write database/config/hashicups-pgsql \
     plugin_name=postgresql-database-plugin \
     allowed_roles="products-api" \
@@ -92,7 +93,7 @@ it with a `CREATE ROLE` statement in Postgres. Here you can also configure thing
 the `default_ttl` or `max_ttl`, which refers to the duration of the lease on the
 secrets before they expire and are automatically revoked.
 
-```
+```bash,run
 vault write database/roles/products-api \
     db_name=hashicups-pgsql \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' SUPERUSER; \
@@ -103,7 +104,7 @@ vault write database/roles/products-api \
 
 You are now ready to generate dynamic Postgres credentials.
 
-```
+```bash,run
 vault read database/creds/products-api
 ```
 
@@ -111,11 +112,11 @@ Confirm that you can connect to Postgres with these credentials by plugging
 the response values into the below command. Enter the generated password
 when prompted.
 
-```
+```run
 psql -U <YOUR_GENERATED_USERNAME> -h $PG_HOST products
 ```
 
-If you can successfully log in,  then you have successfully configured Vault
+If you can successfully log in, then you have successfully configured Vault
 for dynamic database credentials and are ready to move on.
 
 Exit `psql` by typing `\q`.
@@ -124,20 +125,20 @@ The last thing you want to do is rotate the root credential that you
 configured the database secret engine with, since you don't want anyone
 to be able to use that set of credentials again.
 
-```
+```bash,run
 vault write -force database/rotate-root/hashicups-pgsql
 ```
 
 Confirm that you can no longer login with the credentials as before, typing
 "password" when prompted for the password of the postgres user.
 
-```
+```bash,run
 psql -U postgres -h $PG_HOST
 ```
 
 Now, you can delete the old path, since we no longer need it.
 
-```
+```bash,run
 vault kv delete kv/db/postgres/product-db-creds
 ```
 
@@ -147,13 +148,13 @@ altogether. This is because the old deployment has cached results using
 the old username and password. Don't worry, you'll create a new one in the
 next challenge.
 
-```
+```bash,run
 kubectl delete deployment products-api-deployment
 ```
 
 Confirm the Products API deployment has been deleted.
 
-```
+```bash,run
 kubectl get deployment
 ```
 
