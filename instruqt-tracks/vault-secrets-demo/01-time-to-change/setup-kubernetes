@@ -1,4 +1,14 @@
 #!/bin/bash -l
+set -euxo pipefail
+PS4='+$0[$LINENO]+ '
+export PS4
+set -e
+
+# VCDL-617 Hack - we need to remove this repository temporarily because this is based
+# on Ubuntu Xenial, which is EOL, which means the k8s repository for xenial no longer has
+# a releases file, so the apt-get update fails
+sudo rm -f /etc/apt/sources.list.d/kubernetes.list
+# END VCDL-617 Hack
 
 ###########
 # Install Postgres client for testing
@@ -7,7 +17,6 @@ curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo apt-get update
 sudo apt-get install -y postgresql-client
 apt install postgresql-client-common
-
 
 ###########
 # Install Consul Client
@@ -19,7 +28,6 @@ mv consul /usr/local/bin/consul
 chmod +x /usr/local/bin/consul
 rm -f consul_${CONSUL_VERSION}_linux_amd64.zip
 
-
 ###########
 # Install Vault Client
 ###########
@@ -30,11 +38,10 @@ mv vault /usr/local/bin/vault
 chmod +x /usr/local/bin/vault
 rm -f vault_${VAULT_VERSION}_linux_amd64.zip
 
-
 ###########
 # Configure Vault Helm Chart values
 ###########
-cat <<-EOF > /root/vault-values.yaml
+cat <<-EOF >/root/vault-values.yaml
 injector:
   agentImage:
     repository: "hashicorp/vault"
@@ -71,13 +78,13 @@ EOF
 # Install Vault with the Helm Chart
 ###########
 helm repo add hashicorp https://helm.releases.hashicorp.com
-helm install --wait vault hashicorp/vault --values /root/vault-values.yaml --version 0.11.0
-
+helm install vault hashicorp/vault \
+  --wait --values /root/vault-values.yaml --version 0.11.0
 
 ###########
 # Configure Consul Helm Chart values
 ###########
-cat <<-EOF > /root/consul-values.yaml
+cat <<-EOF >/root/consul-values.yaml
 global:
   datacenter: dc1
   image: "consul:1.9.7"
@@ -99,12 +106,10 @@ syncCatalog:
   default: true
 EOF
 
-
 ###########
 # Install Consul with the Helm Chart
 ###########
 helm install --wait -f /root/consul-values.yaml hashicorp hashicorp/consul --version 0.31.1
-
 
 ###########
 # Setup the UI for Consul
@@ -138,7 +143,7 @@ mkdir /root/k8s/
 ###########
 # Set up Postgres Products DB Kubernetes Deployment
 ###########
-cat <<-EOF > /root/k8s/products-db.yml
+cat <<-EOF >/root/k8s/products-db.yml
 ---
 apiVersion: v1
 kind: Service
@@ -194,11 +199,10 @@ EOF
 
 kubectl apply -f /root/k8s/products-db.yml
 
-
 ###########
 # Set up Products API Kubernetes Deployment
 ###########
-cat <<-EOF > /root/k8s/products-api.yml
+cat <<-EOF >/root/k8s/products-api.yml
 ---
 # Service to expose web frontend
 apiVersion: v1
@@ -293,11 +297,10 @@ EOF
 
 kubectl apply -f /root/k8s/products-api.yml
 
-
 ###########
 # Set up Public API Kubernetes Deployment
 ###########
-cat <<-EOF > /root/k8s/public-api.yml
+cat <<-EOF >/root/k8s/public-api.yml
 ---
 apiVersion: v1
 kind: Service
@@ -362,12 +365,11 @@ EOF
 
 kubectl apply -f /root/k8s/public-api.yml
 
-
 ###########
 # Set up Frontend Kubernetes Deployment
 ###########
 
-cat <<-EOF > /root/k8s/frontend.yml
+cat <<-EOF >/root/k8s/frontend.yml
 ---
 apiVersion: v1
 kind: Service
@@ -453,22 +455,19 @@ EOF
 
 kubectl apply -f /root/k8s/frontend.yml
 
-
-
 ###########
 # Set Vault env vars for client usage
 ###########
 export VAULT_IP=$(kubectl get svc vault -o=json | jq -r .spec.clusterIP)
 export VAULT_ADDR="http://$VAULT_IP:8200"
 export VAULT_TOKEN="root"
-echo "export VAULT_ADDR=$VAULT_ADDR" >> /root/.bashrc
-echo "export VAULT_TOKEN=$VAULT_TOKEN" >> /root/.bashrc
+echo "export VAULT_ADDR=$VAULT_ADDR" >>/root/.bashrc
+echo "export VAULT_TOKEN=$VAULT_TOKEN" >>/root/.bashrc
 
 ###########
 # Wait for Vault to start
 ###########
 sleep 10
-
 
 ###########
 # Set up the Kubernetes auth method with k3s
@@ -478,8 +477,14 @@ vault auth enable kubernetes
 export SA_NAME="products-api"
 export SA_NAMESPACE=$(kubectl get sa $SA_NAME -o jsonpath="{.metadata.namespace}")
 export VAULT_SECRET_NAME=$(kubectl get sa $SA_NAME -o jsonpath="{.secrets[*]['name']}")
-export SA_JWT_TOKEN=$(kubectl get secret $VAULT_SECRET_NAME -o jsonpath="{.data.token}" | base64 --decode; echo)
-export SA_CA_CRT="$(kubectl get secret $VAULT_SECRET_NAME -o jsonpath="{.data['ca\.crt']}" | base64 --decode; echo)"
+export SA_JWT_TOKEN=$(
+  kubectl get secret $VAULT_SECRET_NAME -o jsonpath="{.data.token}" | base64 --decode
+  echo
+)
+export SA_CA_CRT="$(
+  kubectl get secret $VAULT_SECRET_NAME -o jsonpath="{.data['ca\.crt']}" | base64 --decode
+  echo
+)"
 export K8S_HOST=$(kubectl get svc kubernetes -o=json | jq -r .spec.clusterIP)
 
 # Tell Vault how to communicate with the Kubernetes cluster
@@ -504,11 +509,10 @@ vault secrets enable -path="kv" kv
 # Place an example secret in a "shared" mount to demo a bad secret management practice
 mkdir -p /share/
 echo "username=postgres
-password=password" > /share/postgres-product-creds.txt
+password=password" >/share/postgres-product-creds.txt
 
 # Don't change the password here, the user will update it in a challenge.
 vault kv put kv/db/postgres/product-db-creds username=postgres password=replacemeplz
-
 
 ###########
 # User Policies
