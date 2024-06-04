@@ -19,8 +19,8 @@ developers:
 - lance@hashicorp.com
 - roger@hashicorp.com
 - syed.quadri@hashicorp.com
-idle_timeout: 1200
-timelimit: 7200
+idle_timeout: 3000
+timelimit: 14400
 lab_config:
   overlay: false
   width: 33
